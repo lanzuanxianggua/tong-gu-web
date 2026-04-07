@@ -1,0 +1,57 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 测试
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# 日志
+logs/
+*.log
+
+# 媒体文件（可选，如果不需要在容器中处理图片）
+# media/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# 数据库
+*.db
+*.sqlite3
+
+# 环境文件（使用 docker-compose.yml 中的环境变量）
+.env
+.env.production
+
+# 前端构建产物（如果使用独立的 Nginx 服务）
+frontend/dist/
+frontend/node_modules/
+
+# YOLO 训练数据
+exp21/

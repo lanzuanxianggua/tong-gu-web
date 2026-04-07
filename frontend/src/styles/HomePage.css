@@ -1,0 +1,677 @@
+/* ============================================
+   首页样式 - 粒子效果 + 导航栏
+   ============================================ */
+
+/* 基础重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 背景由theme.css统一管理 */
+
+/* ============================================
+   导航栏样式
+   ============================================ */
+
+.home-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding-top: 0.5rem;
+  background: transparent;
+}
+
+.home-nav-container {
+  margin: 0 auto;
+  max-width: 80rem;
+  border-radius: 1.5rem;
+  padding: 0 1.5rem;
+  transition: all 0.3s ease;
+}
+
+@media (min-width: 1024px) {
+  .home-nav-container {
+    padding: 0 3rem;
+  }
+}
+
+/* 滚动后的背景效果 - 保持全透明 */
+.home-nav-container.scrolled {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.home-nav-content {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.75rem 0;
+  transition: all 0.2s ease;
+}
+
+@media (min-width: 1024px) {
+  .home-nav-content {
+    gap: 0;
+    padding: 1.5rem 0;
+  }
+
+  .home-nav-content.scrolled {
+    padding: 1.5rem 0;
+  }
+}
+
+/* Logo + 菜单区域 */
+.home-nav-brand {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3rem;
+}
+
+@media (min-width: 1024px) {
+  .home-nav-brand {
+    width: auto;
+  }
+}
+
+.home-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.home-logo:hover {
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.logo-image {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 0 8px rgba(155, 153, 254, 0.5));
+}
+
+.home-logo:hover .logo-image {
+  filter: drop-shadow(0 0 12px rgba(155, 153, 254, 0.8));
+  transform: scale(1.05);
+}
+
+.logo-text {
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  margin-left: 16px;
+  white-space: nowrap;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(90deg, #d4af37, #f4e4ba, #d4af37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+.home-logo:hover .logo-text {
+  background: linear-gradient(90deg, #f4e4ba, #d4af37, #f4e4ba);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 8px rgba(212, 175, 55, 0.6);
+}
+
+@media (max-width: 1024px) {
+  .logo-text {
+    font-size: 16px;
+    margin-left: 12px;
+  }
+
+  .logo-image {
+    height: 36px;
+  }
+}
+
+@media (max-width: 768px) {
+  .logo-text {
+    font-size: 14px;
+    margin-left: 10px;
+  }
+
+  .logo-image {
+    height: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-text {
+    font-size: 12px;
+    margin-left: 8px;
+  }
+
+  .logo-image {
+    height: 28px;
+  }
+}
+
+@media (max-width: 360px) {
+  .logo-text {
+    font-size: 10px;
+  }
+
+  .logo-image {
+    height: 24px;
+  }
+}
+
+.home-logo svg {
+  height: 1.25rem;
+  width: auto;
+}
+
+/* 移动端菜单按钮 */
+.home-nav-toggle {
+  position: relative;
+  z-index: 20;
+  margin: -0.625rem -1rem -0.625rem 0;
+  display: block;
+  cursor: pointer;
+  padding: 0.625rem;
+  background: none;
+  border: none;
+  color: white;
+}
+
+@media (min-width: 1024px) {
+  .home-nav-toggle {
+    display: none;
+  }
+}
+
+.home-nav-toggle-icon {
+  margin: auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.home-nav-toggle-icon.active {
+  transform: rotate(180deg) scale(0);
+  opacity: 0;
+}
+
+.home-nav-toggle-close {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  transform: rotate(-180deg) scale(0);
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.home-nav-toggle-close.active {
+  transform: rotate(0) scale(1);
+  opacity: 1;
+}
+
+/* 桌面端导航链接 */
+.home-nav-links {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .home-nav-links {
+    display: block;
+  }
+
+  .home-nav-links ul {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .home-nav-link {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    position: relative;
+    padding: 0.5rem 0;
+    overflow: hidden;
+  }
+
+  .home-nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: -100%;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, #d4af37, #f4e4ba, #d4af37);
+    transition: all 0.3s ease;
+  }
+
+  .home-nav-link:hover {
+    color: #f4e4ba;
+    text-decoration: none;
+    transform: translateY(-2px);
+  }
+
+  .home-nav-link:hover::before {
+    left: 0;
+  }
+
+  .cursor-pointer {
+    cursor: pointer;
+  }
+}
+
+/* 移动端菜单 / 桌面端按钮区域 */
+.home-nav-menu {
+  display: none;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.home-nav-menu.active {
+  display: flex;
+}
+
+@media (min-width: 768px) {
+  .home-nav-menu {
+    flex-wrap: nowrap;
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-nav-menu {
+    display: flex !important;
+    margin: 0;
+    width: fit-content;
+    gap: 1.5rem;
+    border: transparent;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+  }
+}
+
+/* 响应式用户信息 */
+@media (max-width: 768px) {
+  .home-user-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .user-name {
+    font-size: 0.8125rem;
+  }
+}
+
+/* 移动端导航链接 */
+.home-nav-mobile {
+  display: block;
+}
+
+@media (min-width: 1024px) {
+  .home-nav-mobile {
+    display: none;
+  }
+}
+
+.home-nav-mobile ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.home-nav-mobile .home-nav-link {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 1rem;
+  display: block;
+  transition: color 0.15s ease;
+}
+
+.home-nav-mobile .home-nav-link:hover {
+  color: #9B99FE;
+  text-decoration: none;
+}
+
+/* 登录/注册按钮区域 */
+.home-nav-actions {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .home-nav-actions {
+    flex-direction: row;
+    gap: 0.75rem;
+    width: fit-content;
+  }
+}
+
+/* 用户信息区域 */
+.home-user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-name {
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================
+   玻璃态按钮样式 - 液态玻璃效果（无黑色阴影）
+   ============================================ */
+
+.btn-glass {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  color: white;
+  padding: 0.6rem 1.5rem;
+  overflow: hidden;
+  text-decoration: none;
+  /* 彩色发光替代黑色阴影 */
+  box-shadow:
+    /* 外发光 - 主题色 */
+    0 0 20px rgba(155, 153, 254, 0.3),
+    0 0 40px rgba(43, 200, 183, 0.15),
+    /* 内发光 - 白色高光 */
+    inset 0 1px 1px rgba(255, 255, 255, 0.4),
+    inset 0 -1px 1px rgba(155, 153, 254, 0.1);
+}
+
+/* 液态玻璃反光效果 */
+.btn-glass::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(115deg,
+      transparent 0%,
+      transparent 40%,
+      rgba(255, 255, 255, 0.15) 50%,
+      transparent 60%,
+      transparent 100%);
+  transition: all 0.6s ease;
+  pointer-events: none;
+}
+
+/* 顶部边缘高光 */
+.btn-glass::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.8),
+      transparent);
+  border-radius: 9999px;
+}
+
+/* 悬停效果 - 增强液态玻璃感 */
+.btn-glass:hover {
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0.1) 100%);
+  border-color: rgba(155, 153, 254, 0.5);
+  transform: scale(1.05);
+  text-decoration: none;
+  box-shadow:
+    /* 增强外发光 */
+    0 0 30px rgba(255, 255, 255, 0.5),
+    0 0 60px rgba(255, 255, 255, 0.25),
+    0 0 90px rgba(255, 255, 255, 0.1),
+    /* 增强内发光 */
+    inset 0 1px 2px rgba(255, 255, 255, 0.5),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.2);
+}
+
+/* 扫光动画 */
+.btn-glass:hover::before {
+  left: 100%;
+}
+
+/* 点击效果 */
+.btn-glass:active {
+  transform: scale(0.98);
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.05) 100%);
+  box-shadow:
+    0 0 15px rgba(255, 255, 255, 0.3),
+    0 0 30px rgba(255, 255, 255, 0.15),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3),
+    inset 0 -1px 1px rgba(155, 153, 254, 0.1);
+}
+
+/* 禁用状态 */
+.btn-glass:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 0 10px rgba(155, 153, 254, 0.15),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+/* 按钮内容 */
+.btn-glass-content {
+  position: relative;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.btn-glass-content a {
+  color: white;
+  text-decoration: none;
+}
+
+/* 移除原来的阴影层和滤镜层（保留类名防止模板报错） */
+.btn-glass-shadow,
+.btn-glass-backdrop {
+  display: none;
+}
+
+/* ============================================
+   粒子画布样式
+   ============================================ */
+
+.particle-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+}
+
+/* ============================================
+   SVG 滤镜（隐藏但功能存在）
+   ============================================ */
+
+.svg-filters {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* ============================================
+   工具类
+   ============================================ */
+
+/* 尺寸工具 */
+.size-4 {
+  width: 1rem;
+  height: 1rem;
+}
+
+.size-6 {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* 文本工具 */
+.text-nowrap {
+  white-space: nowrap;
+}
+
+/* ============================================
+   动画效果
+   ============================================ */
+
+/* 滚动动画 */
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s ease;
+}
+
+.fade-in-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-in-left {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: all 0.6s ease;
+}
+
+.fade-in-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.fade-in-right {
+  opacity: 0;
+  transform: translateX(30px);
+  transition: all 0.6s ease;
+}
+
+.fade-in-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* 悬停效果 */
+.hover-lift {
+  transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.hover-glow {
+  transition: all 0.3s ease;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(155, 153, 254, 0.6);
+}
+
+/* 脉冲动画 */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(155, 153, 254, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(155, 153, 254, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(155, 153, 254, 0);
+  }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* 渐变文字 */
+.gradient-text {
+  background: linear-gradient(90deg, #9B99FE, #2BC8B7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 平滑滚动 */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 颜色变量（供 Tailwind 使用） */
+:root {
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --primary: 250 95% 76%;
+  --primary-foreground: 0 0% 100%;
+  --muted-foreground: 0 0% 100% / 0.6;
+  --accent-foreground: 250 95% 76%;
+  --destructive: 0 84% 60%;
+  --ring: 250 95% 76%;
+  --input: 0 0% 100% / 0.15;
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .dark-invert {
+    filter: invert(1);
+  }
+}

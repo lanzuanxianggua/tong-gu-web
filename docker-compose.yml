@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # MySQL 数据库
+  db:
+    image: mysql:8.0
+    container_name: tonggu-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: tong-gu
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: Zx9!cV7@bN3#mK5
+      MYSQL_ROOT_PASSWORD: Rt6$yU8!iO9#pL2
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./tong-gu.sql:/docker-entrypoint-initdb.d/init.sql
+    # 生产环境建议移除端口映射
+    # ports:
+    #   - "3306:3306"
+    networks:
+      - tonggu-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+
+  # Django 后端
+  backend:
+    build: .
+    container_name: tonggu-backend
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # 密钥配置
+      SECRET_KEY: 8q3!z7@y9$x2#v4%b6^n5&m1*k8(j0)p2
+      # 数据库配置
+      DB_NAME: tong-gu
+      DB_USER: app_user
+      DB_PASSWORD: Zx9!cV7@bN3#mK5
+      DB_HOST: db
+      DB_PORT: 3306
+      # Django 配置
+      DEBUG: 'False'
+      ALLOWED_HOSTS: 'localhost,127.0.0.1,your-domain.com'
+    volumes:
+      - ./media:/app/media
+      - ./logs:/app/logs
+    ports:
+      - "8000:8000"
+    networks:
+      - tonggu-network
+    security_opt:
+      - no-new-privileges:true
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn --bind 0.0.0.0:8000 --workers 3 backend.wsgi:application"
+
+  # Nginx 反向代理（可选，用于生产环境）
+  nginx:
+    image: nginx:alpine
+    container_name: tonggu-nginx
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - tonggu-network
+
+networks:
+  tonggu-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
