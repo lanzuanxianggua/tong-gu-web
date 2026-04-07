@@ -67,7 +67,6 @@ htmlcov/
 # 训练数据
 exp*/
 runs/
-*.pt
 *.pth
 *.onnx
 *.engine
