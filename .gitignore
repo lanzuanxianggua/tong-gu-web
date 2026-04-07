@@ -65,7 +65,7 @@ htmlcov/
 .tox/
 
 # 训练数据
-exp*/
+
 runs/
 *.pth
 *.onnx
