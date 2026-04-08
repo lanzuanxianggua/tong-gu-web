@@ -122,7 +122,9 @@
                 <template v-else>
                   <!-- 用户信息和退出登录 -->
                   <div class="home-user-info">
-                    <span class="user-name">{{ userName }}</span>
+                    <span class="user-name" @click="handleProfileClick" :title="userName" style="cursor: pointer;">
+                      {{ userName }}
+                    </span>
                     <div class="btn-glass" @click="handleLogout">
                       <div class="btn-glass-shadow"></div>
                       <div class="btn-glass-backdrop"></div>
@@ -185,7 +187,9 @@
 </template>
 
 <script lang="ts">
-export const DEFAULT_WORDS = ["Hello", "Welcome", "Learn","Tong Gu"]
+// export const DEFAULT_WORDS = ["Hello", "Welcome", "Learn","Tong Gu"]
+export const DEFAULT_WORDS = ["你好", "欢迎", "了解","铜鼓"]
+
 </script>
 
 <script setup lang="ts">
@@ -236,7 +240,7 @@ const checkLoginStatus = () => {
 
 // 退出登录
 const handleLogout = () => {
-  // 清除本地存储的用户信息和token
+  // 清除本地存储的用户信息和 token
   localStorage.removeItem('user')
   localStorage.removeItem('access_token')
   localStorage.removeItem('refresh_token')
@@ -247,6 +251,14 @@ const handleLogout = () => {
   
   // 跳转到首页
   router.push('/')
+}
+
+// 跳转到个人信息页面
+const handleProfileClick = () => {
+  console.log('点击用户名，跳转到个人信息页面')
+  console.log('当前登录状态:', isLoggedIn.value)
+  console.log('用户名:', userName.value)
+  router.push('/profile')
 }
 
 // 切换菜单状态

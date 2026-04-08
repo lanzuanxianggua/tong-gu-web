@@ -8,7 +8,8 @@ from .serializers import (
     UserRegisterSerializer, 
     LoginSerializer,
     TokenRefreshSerializer,
-    ForgotPasswordSerializer
+    ForgotPasswordSerializer,
+    ChangePasswordSerializer
 )
 from .models import User
 import logging
@@ -173,6 +174,71 @@ def forgot_password(request):
                     'message': '该手机号码未注册'
                 },
                 status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {
+                    'message': f'密码修改失败：{str(e)}'
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    return Response(
+        {
+            'message': '请求数据无效',
+            'errors': serializer.errors
+        },
+        status=status.HTTP_400_BAD_REQUEST
+    )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    """
+    获取当前用户个人信息
+    需要 JWT token 认证
+    """
+    user = request.user
+    return Response(
+        {
+            'user': UserSerializer(user).data,
+            'message': '获取成功'
+        },
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    """
+    修改密码接口
+    需要登录，验证手机号码后修改密码
+    """
+    serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+    if serializer.is_valid():
+        phone = serializer.validated_data['phone']
+        new_password = serializer.validated_data['new_password']
+        
+        try:
+            # 验证手机号码是否匹配当前用户
+            if request.user.phone != phone:
+                return Response(
+                    {
+                        'message': '手机号码与当前用户不匹配'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # 更新密码
+            request.user.set_password(new_password)
+            request.user.save()
+            
+            return Response(
+                {
+                    'message': '密码修改成功'
+                },
+                status=status.HTTP_200_OK
             )
         except Exception as e:
             return Response(

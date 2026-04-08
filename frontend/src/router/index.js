@@ -63,6 +63,18 @@ const router = createRouter({
       name: 'detection',
       component: () => import('../pages/DetectionPage.vue'),
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: () => import('../pages/UserProfilePage.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/change-password',
+      name: 'change-password',
+      component: () => import('../pages/ChangePasswordPage.vue'),
+      meta: { requiresAuth: true }
     }
   ]
 })

@@ -5,7 +5,9 @@ from .views import (
     token_refresh,
     user_logout,
     user_info,
-    forgot_password
+    forgot_password,
+    user_profile,
+    change_password
 )
 
 urlpatterns = [
@@ -21,4 +23,8 @@ urlpatterns = [
     path('info/', user_info, name='user_info'),
     # 忘记密码接口
     path('forgot-password/', forgot_password, name='forgot_password'),
+    # 获取个人信息（需要登录）
+    path('profile/', user_profile, name='user_profile'),
+    # 修改密码（需要登录）
+    path('change-password/', change_password, name='change_password'),
 ]

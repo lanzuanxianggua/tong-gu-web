@@ -145,186 +145,210 @@
       </nav>
     </header>
 
-    <!-- 页面内容 -->
-    <div class="detection-container">
-      <div class="page-header-wrapper">
-        <div class="page-header glassmorphism">
-          <div class="page-title">铜鼓纹样智能检测与分析</div>
-        </div>
-      </div>
-
-    <el-row :gutter="24" class="main-content">
-      <!-- 左侧：操作与上传 -->
-      <el-col :md="8" :sm="24">
-        <el-card class="control-card glassmorphism" shadow="never">
-          <template #header>
-            <div class="card-header">
-              <span class="header-title">上传待检测图片</span>
-            </div>
-          </template>
-
-          <el-upload
-            class="upload-area"
-            drag
-            action="#"
-            :auto-upload="false"
-            :show-file-list="false"
-            :on-change="handleFileChange"
-          >
-            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-            <div class="el-upload__text">
-              将纹样图片拖到此处，或<em>点击上传</em>
-            </div>
-          </el-upload>
-
-          <div class="action-btns" v-if="selectedFile">
-            <el-button
-              size="large"
-              :loading="isLoading"
-              @click="startDetection"
-              class="detect-btn touch-feedback glass-button"
-            >
-              开始智能检测分析
-            </el-button>
-          </div>
-
-          <!-- 识别结果结构化展示 -->
-          <div class="results-panel" v-if="detections.length > 0">
-            <div class="results-header">
-              <h3>
-                <el-icon><Histogram /></el-icon> 识别结果分析
-              </h3>
-            </div>
-            <div
-              v-for="(item, index) in detections"
-              :key="index"
-              class="detection-item glassmorphism"
-            >
-              <el-descriptions :column="1" border size="small">
-                <el-descriptions-item label="纹样类型">
-                  <el-tag type="success" effect="dark">{{ item.label }}</el-tag>
-                </el-descriptions-item>
-                <el-descriptions-item label="年代推测">
-                  <span class="info-text">{{ item.era }}</span>
-                </el-descriptions-item>
-                <el-descriptions-item label="地域类型">
-                  <span class="info-text">{{ item.region }}</span>
-                </el-descriptions-item>
-                <el-descriptions-item label="置信度">
-                  <el-progress
-                    :percentage="Math.round(item.confidence * 100)"
-                    :color="customColors"
-                  />
-                </el-descriptions-item>
-              </el-descriptions>
-
-              <div class="save-action" v-if="user">
-                <el-input
-                  v-model="item.remark"
-                  placeholder="添加个人备注..."
-                  size="small"
-                  class="remark-input"
-                >
-                  <template #append>
-                    <el-button @click="saveRecord(item)" class="touch-feedback glass-button">保存记录</el-button>
+    <!-- 主要内容 -->
+    <main class="main-content">
+      <section class="content-section">
+        <div class="section-container">
+          <h1 class="page-title">铜鼓纹样智能检测与分析</h1>
+          <p class="section-desc text-center">
+            基于深度学习的铜鼓纹样智能识别与数字化分析系统
+          </p>
+          
+          <div class="detection-container">
+            <el-row :gutter="24">
+              <!-- 左侧：操作与上传 -->
+              <el-col :md="8" :sm="24">
+                <el-card class="control-card" shadow="never">
+                  <template #header>
+                    <div class="card-header">
+                      <span class="header-title">上传待检测图片</span>
+                    </div>
                   </template>
-                </el-input>
-              </div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
 
-      <!-- 右侧：可视化展示区域 -->
-      <el-col :md="16" :sm="24">
-        <el-card class="display-card glassmorphism" shadow="never">
-          <template #header>
-            <div class="card-header">
-              <span class="header-title">可视化标记与关键特征</span>
-            </div>
-          </template>
+                  <el-upload
+                    class="upload-area"
+                    drag
+                    action="#"
+                    :auto-upload="false"
+                    :show-file-list="false"
+                    :on-change="handleFileChange"
+                  >
+                    <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+                    <div class="el-upload__text">
+                      将纹样图片拖到此处，或<em>点击上传</em>
+                    </div>
+                  </el-upload>
 
-          <div class="image-preview-container">
-            <template v-if="annotatedImage">
-              <el-image
-                :src="annotatedImage"
-                fit="contain"
-                class="preview-img"
-                :preview-src-list="[annotatedImage]"
-              />
-            </template>
-            <template v-else-if="previewUrl">
-              <el-image :src="previewUrl" fit="contain" class="preview-img" />
-            </template>
-            <el-empty v-else description="请先在左侧上传铜鼓纹样图片" />
-          </div>
-        </el-card>
-
-        <!-- 历史记录展示 -->
-        <el-card
-          class="history-card glassmorphism"
-          v-if="user && historyRecords.length > 0"
-          shadow="never"
-        >
-          <template #header>
-            <div class="card-header">
-              <span class="header-title">识别记录归档</span>
-              <el-radio-group v-model="filterType" size="small" class="filter-group">
-                <el-radio-button value="all" class="touch-feedback">全部</el-radio-button>
-                <el-radio-button value="sun" class="touch-feedback">太阳纹</el-radio-button>
-                <el-radio-button value="wa" class="touch-feedback">蛙纹</el-radio-button>
-                <el-radio-button value="lei" class="touch-feedback">云雷纹</el-radio-button>
-              </el-radio-group>
-            </div>
-          </template>
-          <el-row :gutter="20">
-            <el-col
-              :span="8"
-              v-for="record in filteredRecords"
-              :key="record.id"
-              class="history-col"
-            >
-              <el-card
-                :body-style="{ padding: '0px' }"
-                class="record-card glassmorphism"
-                shadow="hover"
-              >
-                <el-image
-                  :src="record.annotated_image_data"
-                  fit="cover"
-                  class="record-img"
-                  :alt="record.pattern_type"
-                />
-                <div class="record-info">
-                  <div class="record-title">
-                    <span class="record-label">{{ record.pattern_type }}</span>
-                    <span class="record-date">{{
-                      formatDate(record.created_at)
-                    }}</span>
+                  <div class="action-btns" v-if="selectedFile">
+                    <el-button
+                      size="large"
+                      :loading="isLoading"
+                      @click="startDetection"
+                      class="detect-btn"
+                    >
+                      开始智能检测分析
+                    </el-button>
                   </div>
-                  <p class="record-era">{{ record.era_estimate }}</p>
-                  <p class="record-remark" v-if="record.remark">
-                    {{ record.remark }}
-                  </p>
-                </div>
-              </el-card>
-            </el-col>
-          </el-row>
-        </el-card>
-      </el-col>
-    </el-row>
-    </div>
+
+                  <!-- 识别结果结构化展示 -->
+                  <div class="results-panel" v-if="detections.length > 0">
+                    <div class="results-header">
+                      <h3>
+                        <el-icon><Histogram /></el-icon> 识别结果分析
+                      </h3>
+                    </div>
+                    <div
+                      v-for="(item, index) in detections"
+                      :key="index"
+                      class="detection-item"
+                    >
+                      <el-descriptions :column="1" border size="small">
+                        <el-descriptions-item label="纹样类型">
+                          <el-tag type="success" effect="dark">{{ item.label }}</el-tag>
+                        </el-descriptions-item>
+                        <el-descriptions-item label="年代推测">
+                          <span class="info-text">{{ item.era }}</span>
+                        </el-descriptions-item>
+                        <el-descriptions-item label="地域类型">
+                          <span class="info-text">{{ item.region }}</span>
+                        </el-descriptions-item>
+                        <el-descriptions-item label="置信度">
+                          <el-progress
+                            :percentage="Math.round(item.confidence * 100)"
+                            :color="customColors"
+                          />
+                        </el-descriptions-item>
+                      </el-descriptions>
+
+                      <div class="save-action" v-if="user">
+                        <el-input
+                          v-model="item.remark"
+                          placeholder="添加个人备注..."
+                          size="small"
+                          class="remark-input"
+                        >
+                          <template #append>
+                            <el-button @click="saveRecord(item)" class="save-btn">保存记录</el-button>
+                          </template>
+                        </el-input>
+                      </div>
+                    </div>
+                  </div>
+                </el-card>
+              </el-col>
+
+              <!-- 右侧：可视化展示区域 -->
+              <el-col :md="16" :sm="24">
+                <el-card class="display-card" shadow="never">
+                  <template #header>
+                    <div class="card-header">
+                      <span class="header-title">可视化标记与关键特征</span>
+                    </div>
+                  </template>
+
+                  <div class="image-preview-container">
+                    <template v-if="annotatedImage">
+                      <el-image
+                        :src="annotatedImage"
+                        fit="contain"
+                        class="preview-img"
+                        :preview-src-list="[annotatedImage]"
+                      />
+                    </template>
+                    <template v-else-if="previewUrl">
+                      <el-image :src="previewUrl" fit="contain" class="preview-img" />
+                    </template>
+                    <el-empty v-else description="请先在左侧上传铜鼓纹样图片" />
+                  </div>
+                </el-card>
+
+                <!-- 历史记录展示 -->
+                <el-card
+                  class="history-card"
+                  v-if="user && historyRecords.length > 0"
+                  shadow="never"
+                >
+                  <template #header>
+                    <div class="card-header">
+                      <span class="header-title">识别记录归档</span>
+                      <el-radio-group v-model="filterType" size="small" class="filter-group">
+                        <el-radio-button value="all">全部</el-radio-button>
+                        <el-radio-button value="sun">太阳纹</el-radio-button>
+                        <el-radio-button value="wa">蛙纹</el-radio-button>
+                        <el-radio-button value="lei">云雷纹</el-radio-button>
+                      </el-radio-group>
+                    </div>
+                  </template>
+                  <el-row :gutter="20">
+                    <el-col
+                      :span="8"
+                      v-for="record in paginatedRecords"
+                      :key="record.id"
+                      class="history-col"
+                    >
+                      <el-card
+                        :body-style="{ padding: '0px' }"
+                        class="record-card"
+                        shadow="hover"
+                      >
+                        <el-image
+                          :src="record.annotated_image_data"
+                          fit="cover"
+                          class="record-img"
+                          :alt="record.pattern_type"
+                        />
+                        <div class="record-info">
+                          <div class="record-title">
+                            <span class="record-label">{{ record.pattern_type }}</span>
+                            <span class="record-date">{{
+                              formatDate(record.created_at)
+                            }}</span>
+                          </div>
+                          <p class="record-era">{{ record.era_estimate }}</p>
+                          <p class="record-remark" v-if="record.remark">
+                            {{ record.remark }}
+                          </p>
+                          <div class="record-actions" v-if="user">
+                            <el-button
+                              type="danger"
+                              size="small"
+                              @click="deleteRecord(record.id)"
+                              class="delete-btn"
+                            >
+                              <el-icon><Delete /></el-icon> 删除
+                            </el-button>
+                          </div>
+                        </div>
+                      </el-card>
+                    </el-col>
+                  </el-row>
+                  
+                  <!-- 分页器 -->
+                  <div class="pagination-container" v-if="totalPages > 1">
+                    <el-pagination
+                      v-model="currentPage"
+                      :page-size="pageSize"
+                      :total="filteredRecords.length"
+                      layout="prev, pager, next"
+                      :background="false"
+                      class="custom-pagination"
+                    />
+                  </div>
+                </el-card>
+              </el-col>
+            </el-row>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRouter } from "vue-router";
-import { ElMessage } from "element-plus";
-import {
-  UploadFilled,
-  Histogram,
-} from "@element-plus/icons-vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { Delete } from "@element-plus/icons-vue";
 import api from "../utils/axios";
 // 引入样式
 import '@/styles/HomePage.css'
@@ -338,6 +362,8 @@ const annotatedImage = ref("");
 const detections = ref([]);
 const historyRecords = ref([]);
 const filterType = ref("all");
+const currentPage = ref(1);
+const pageSize = ref(6); // 每页显示 9 条记录
 
 // 导航栏相关状态
 const menuState = ref(false);
@@ -481,12 +507,52 @@ const fetchHistory = async () => {
   }
 };
 
+const deleteRecord = async (id) => {
+  try {
+    await ElMessageBox.confirm(
+      '确定要删除这条识别记录吗？此操作无法撤销。',
+      '确认删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    );
+    
+    const response = await api.delete(`/api/detection/delete-record/${id}/`);
+    
+    if (response.status === 200 || response.status === 204) {
+      ElMessage.success('记录已删除');
+      fetchHistory();
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败：' + (error.response?.data?.detail || error.message));
+    }
+  }
+};
+
 const filteredRecords = computed(() => {
   if (filterType.value === "all") return historyRecords.value;
   const typeMap = { sun: "太阳纹", wa: "蛙纹", lei: "云雷纹" };
   return historyRecords.value.filter(
     (r) => r.pattern_type === typeMap[filterType.value]
   );
+});
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredRecords.value.length / pageSize.value);
+});
+
+const paginatedRecords = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  const end = start + pageSize.value;
+  return filteredRecords.value.slice(start, end);
+});
+
+// 监听筛选类型变化，重置页码
+watch(filterType, () => {
+  currentPage.value = 1;
 });
 
 const formatDate = (dateStr) => {
@@ -553,371 +619,467 @@ const formatDate = (dateStr) => {
 
 @keyframes float {
   0%, 100% {
-    transform: translate(0, 0) scale(1);
+    transform: translate(0, 0);
   }
-  33% {
-    transform: translate(30px, -30px) scale(1.1);
+  25% {
+    transform: translate(30px, -30px);
   }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
+  50% {
+    transform: translate(-20px, 20px);
+  }
+  75% {
+    transform: translate(20px, 30px);
   }
 }
 
+/* 检测页面容器 */
 .detection-container {
   position: relative;
-  z-index: 10;
-  padding: var(--ios-spacing-lg) var(--ios-spacing-xl);
-  min-height: calc(100vh - 88px);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  z-index: 1;
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
 }
 
-
-
-.page-header-wrapper {
-  margin-bottom: var(--ios-spacing-lg);
-}
-
-.page-header {
-  padding: var(--ios-spacing-md) var(--ios-spacing-lg);
-  border-radius: var(--ios-radius-lg);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  border: none;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
+/* 页面标题样式 */
 .page-title {
+  font-size: 2.5rem;
   font-weight: 700;
-  color: #fff;
-  font-size: 20px;
-  line-height: 1.2;
   text-align: center;
+  margin-bottom: 1.5rem;
+  color: white;
   background: linear-gradient(90deg, #d4af37, #f4e4ba, #d4af37);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
+.section-desc {
+  font-size: 1.1rem;
+  color: #E5E5EA;
+  margin-bottom: 3rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 主内容区域 */
+.main-content {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 8rem 0 4rem;
+}
+
+.content-section {
+  padding: 2rem 0;
+}
+
+.section-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* 卡片通用样式 - 全透明背景 */
 .control-card,
 .display-card,
 .history-card {
-  border-radius: var(--ios-radius-lg);
-  border: none;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-bottom: var(--ios-spacing-lg);
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  border-radius: 1rem !important;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.control-card :deep(.el-card__header),
+.display-card :deep(.el-card__header),
+.history-card :deep(.el-card__header) {
+  background: transparent !important;
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.control-card :deep(.el-card__body),
+.display-card :deep(.el-card__body),
+.history-card :deep(.el-card__body) {
+  background: transparent !important;
 }
 
 .control-card:hover,
 .display-card:hover,
 .history-card:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-  transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
+/* 卡片头部样式 */
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
 }
 
 .header-title {
+  font-size: 1.2rem;
   font-weight: 600;
-  color: #fff;
-  font-size: 16px;
+  color: #d4af37;
+  background: linear-gradient(90deg, #d4af37, #f4e4ba);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
+/* 上传区域样式 */
 .upload-area {
-  margin-bottom: var(--ios-spacing-md);
+  width: 100%;
+  padding: 2rem;
+  background: transparent;
+  border: 2px dashed rgba(212, 175, 55, 0.3);
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
 }
 
-.upload-area .el-upload {
-  border: 2px dashed #00bfff !important;
-  border-radius: var(--ios-radius-lg);
-  background: rgba(255, 255, 255, 0.1);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+.upload-area:hover {
+  border-color: rgba(212, 175, 55, 0.6);
+  background: transparent;
 }
 
-.upload-area .el-upload:hover {
-  border-color: #0099cc !important;
-  background: rgba(0, 191, 255, 0.1);
-  transform: scale(1.02);
+.upload-area :deep(.el-icon--upload) {
+  font-size: 3rem;
+  color: #d4af37;
+  margin-bottom: 1rem;
 }
 
-.upload-area .el-icon--upload {
-  color: #00bfff !important;
-  font-size: 48px;
-}
-
-.upload-area .el-upload__text {
+.upload-area :deep(.el-upload__text) {
   color: rgba(255, 255, 255, 0.8);
-  font-size: 14px;
+  font-size: 0.95rem;
 }
 
-.upload-area .el-upload__text em {
-  color: #00bfff;
+.upload-area :deep(.el-upload__text em) {
+  color: #d4af37;
   font-style: normal;
-  font-weight: 600;
+}
+
+.upload-area :deep(.el-upload) {
+  background: transparent !important;
+}
+
+.upload-area :deep(.el-upload-dragger) {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+/* 操作按钮区域 */
+.action-btns {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
 }
 
 .detect-btn {
   width: 100%;
-  height: 50px;
-  font-size: 16px;
+  background: linear-gradient(135deg, #d4af37, #f4e4ba);
+  color: #000;
   font-weight: 600;
-  letter-spacing: 1px;
-  background: rgba(0, 191, 255, 0.2) !important;
-  border: 1px solid rgba(0, 191, 255, 0.4) !important;
-  border-radius: var(--ios-radius-full) !important;
-  box-shadow: 0 4px 12px rgba(0, 191, 255, 0.3) !important;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  color: #00bfff !important;
+  font-size: 1rem;
+  padding: 1.25rem 2rem;
+  border: none;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
 }
 
 .detect-btn:hover {
-  background: rgba(0, 191, 255, 0.3) !important;
-  box-shadow: 0 6px 16px rgba(0, 191, 255, 0.4) !important;
-  transform: translateY(-2px) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
 }
 
+.detect-btn:active {
+  transform: translateY(0);
+}
+
+/* 结果展示面板 */
 .results-panel {
-  margin-top: var(--ios-spacing-lg);
-  border-top: 2px solid rgba(255, 255, 255, 0.1);
-  padding-top: var(--ios-spacing-md);
+  margin-top: 1.5rem;
+}
+
+.results-header {
+  margin-bottom: 1rem;
 }
 
 .results-header h3 {
-  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #d4af37;
   display: flex;
   align-items: center;
-  gap: var(--ios-spacing-xs);
-  margin-bottom: var(--ios-spacing-md);
-  font-weight: 600;
-  font-size: 18px;
+  gap: 0.5rem;
 }
 
-.results-header .el-icon {
-  color: #00bfff;
-  font-size: 20px;
-}
-
+/* 检测项样式 */
 .detection-item {
-  margin-bottom: var(--ios-spacing-md);
-  padding: var(--ios-spacing-md);
-  border-radius: var(--ios-radius-lg);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 1rem;
 }
 
-.detection-item:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  background: rgba(255, 255, 255, 0.15);
+.detection-item :deep(.el-descriptions) {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.detection-item :deep(.el-descriptions__header) {
+  background: transparent;
+}
+
+.detection-item :deep(.el-descriptions__label) {
+  background: rgba(212, 175, 55, 0.05);
+  color: #d4af37;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.detection-item :deep(.el-descriptions__content) {
+  color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.detection-item :deep(.el-descriptions__body) {
+  background: transparent;
 }
 
 .info-text {
   color: rgba(255, 255, 255, 0.9);
-  font-weight: 500;
 }
 
-.save-action {
-  margin-top: var(--ios-spacing-sm);
+/* 备注输入框 */
+.remark-input {
+  margin-top: 0.75rem;
 }
 
 .remark-input :deep(.el-input__wrapper) {
-  border-radius: var(--ios-radius-md) 0 0 var(--ios-radius-md) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
-.remark-input :deep(.el-input__wrapper input) {
-  color: #fff !important;
+.remark-input :deep(.el-input__inner) {
+  color: rgba(255, 255, 255, 0.9);
 }
 
-.remark-input :deep(.el-button) {
-  border-radius: 0 var(--ios-radius-md) var(--ios-radius-md) 0 !important;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+.save-btn {
+  background: rgba(212, 175, 55, 0.2);
+  color: #d4af37;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  font-weight: 600;
+  backdrop-filter: blur(10px);
 }
 
-/* 非毛玻璃按钮保持蓝色 */
-.remark-input :deep(.el-button:not(.glass-button)) {
-  background: rgba(0, 191, 255, 0.2) !important;
-  border: 1px solid rgba(0, 191, 255, 0.4) !important;
-  color: #00bfff !important;
+.save-btn:hover {
+  background: rgba(212, 175, 55, 0.3);
+  border-color: rgba(212, 175, 55, 0.8);
 }
 
-.remark-input :deep(.el-button:not(.glass-button):hover) {
-  background: rgba(0, 191, 255, 0.3) !important;
-}
-
+/* 图片预览容器 */
 .image-preview-container {
-  min-height: 600px;
+  width: 100%;
+  min-height: 400px;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--ios-radius-lg);
-  padding: var(--ios-spacing-lg);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  justify-content: center;
+  background: transparent;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
 }
 
 .preview-img {
-  max-width: 100%;
-  max-height: 750px;
-  border-radius: var(--ios-radius-lg);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  max-height: 600px;
+  border-radius: 0.5rem;
 }
 
-.preview-img:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  transform: scale(1.02);
-}
-
-.filter-group :deep(.el-radio-button__inner) {
-  border-radius: var(--ios-radius-md) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  background: rgba(255, 255, 255, 0.1) !important;
-  color: rgba(255, 255, 255, 0.8) !important;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-.filter-group :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
-  background: rgba(0, 191, 255, 0.2) !important;
-  border-color: rgba(0, 191, 255, 0.4) !important;
-  color: #00bfff !important;
-}
-
-.history-col {
-  margin-bottom: var(--ios-spacing-md);
-}
-
+/* 历史记录卡片 */
 .record-card {
-  border-radius: var(--ios-radius-lg);
+  transition: all 0.3s ease;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+.record-card :deep(.el-card__body) {
+  background: transparent !important;
 }
 
 .record-card:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
   transform: translateY(-4px);
-  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 .record-img {
   width: 100%;
-  height: 180px;
+  height: 200px;
   object-fit: cover;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.record-card:hover .record-img {
-  transform: scale(1.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .record-info {
-  padding: var(--ios-spacing-sm);
-  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  background: transparent;
 }
 
 .record-title {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--ios-spacing-xs);
+  margin-bottom: 0.5rem;
 }
 
 .record-label {
+  font-size: 1rem;
   font-weight: 600;
-  color: #00bfff;
+  color: #d4af37;
 }
 
 .record-date {
-  font-size: 12px;
+  font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.6);
 }
 
 .record-era {
-  font-size: 13px;
+  font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.8);
-  margin-bottom: var(--ios-spacing-xs);
+  margin-bottom: 0.5rem;
 }
 
 .record-remark {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.record-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.delete-btn {
+  background: rgba(244, 67, 54, 0.2);
+  border-color: rgba(244, 67, 54, 0.3);
+  color: #f44336;
+  padding: 2px 10px;
+  font-size: 11px;
+  height: 24px;
+  line-height: 1;
+  transition: all 0.3s ease;
+}
+
+.delete-btn .el-icon {
   font-size: 12px;
+  margin-right: 2px;
+}
+
+.delete-btn:hover {
+  background: rgba(244, 67, 54, 0.3);
+  border-color: rgba(244, 67, 54, 0.5);
+  color: #fff;
+}
+
+/* 筛选器样式 */
+.filter-group {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+}
+
+.filter-group :deep(.el-radio-button__inner) {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.2);
   color: rgba(255, 255, 255, 0.8);
-  font-style: italic;
-  line-height: 1.5;
 }
 
-.glassmorphism {
+.filter-group :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
+  background: linear-gradient(135deg, #d4af37, #f4e4ba);
+  border-color: #d4af37;
+  color: #000;
+}
+
+/* 分页器样式 */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  padding: 1rem;
+}
+
+.custom-pagination :deep(.el-pagination) {
+  background: transparent;
+}
+
+.custom-pagination :deep(.el-pager li) {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  min-width: 36px;
+  height: 36px;
+  line-height: 36px;
+  margin: 0 4px;
+  transition: all 0.3s ease;
+}
+
+.custom-pagination :deep(.el-pager li:hover) {
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
-.touch-feedback {
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+.custom-pagination :deep(.el-pager li.is-active) {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(244, 228, 186, 0.2));
+  border-color: rgba(212, 175, 55, 0.6);
+  color: #d4af37;
+  font-weight: 600;
 }
 
-.touch-feedback:active {
-  transform: scale(0.97);
-  opacity: 0.8;
+.custom-pagination :deep(.btn-prev),
+.custom-pagination :deep(.btn-next) {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  min-width: 36px;
+  height: 36px;
+  line-height: 36px;
+  margin: 0 4px;
+  transition: all 0.3s ease;
 }
 
-/* 响应式调整 */
+.custom-pagination :deep(.btn-prev:hover),
+.custom-pagination :deep(.btn-next:hover) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+/* 响应式设计 */
 @media (max-width: 768px) {
   .detection-container {
-    padding: var(--ios-spacing-sm);
-  }
-  
-  .page-header {
-    padding: var(--ios-spacing-sm) var(--ios-spacing-md);
+    padding: 1rem;
   }
   
   .page-title {
-    font-size: 16px;
-  }
-  
-  .card-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--ios-spacing-sm);
-  }
-  
-  .filter-group {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
+    font-size: 2rem;
   }
   
   .image-preview-container {
-    min-height: 400px;
-    padding: var(--ios-spacing-md);
+    min-height: 300px;
   }
 }
 </style>

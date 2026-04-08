@@ -209,3 +209,58 @@ class ForgotPasswordSerializer(serializers.Serializer):
             pass
         
         return attrs
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """
+    修改密码序列化器（已登录用户）
+    """
+    phone = serializers.CharField(required=True, error_messages={"required": "手机号码不能为空"})
+    new_password = serializers.CharField(required=True, write_only=True, error_messages={"required": "新密码不能为空"})
+    confirm_password = serializers.CharField(required=True, write_only=True, error_messages={"required": "请确认新密码"})
+    
+    def validate_phone(self, value):
+        """
+        验证手机号码格式
+        """
+        # 验证手机号码格式
+        if not re.match(r'^1[3-9]\d{9}$', value):
+            raise serializers.ValidationError('请输入正确的手机号码')
+        
+        return value
+    
+    def validate_new_password(self, value):
+        """
+        验证新密码强度
+        """
+        # 检查长度
+        if len(value) < 8:
+            raise serializers.ValidationError('密码长度至少为 8 位')
+        
+        # 检查是否包含大小写字母
+        if not re.search(r'[A-Z]', value):
+            raise serializers.ValidationError('密码必须包含至少一个大写字母')
+        
+        if not re.search(r'[a-z]', value):
+            raise serializers.ValidationError('密码必须包含至少一个小写字母')
+        
+        # 检查是否包含数字
+        if not re.search(r'\d', value):
+            raise serializers.ValidationError('密码必须包含至少一个数字')
+        
+        return value
+    
+    def validate(self, attrs):
+        """
+        验证两次密码是否一致
+        """
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({'confirm_password': '两次输入的密码不一致'})
+        
+        # 验证新密码是否与旧密码相同
+        request = self.context.get('request')
+        if request and request.user:
+            if request.user.check_password(attrs['new_password']):
+                raise serializers.ValidationError({'new_password': '新密码不能与旧密码相同'})
+        
+        return attrs

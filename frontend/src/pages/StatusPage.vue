@@ -141,7 +141,7 @@
     </header>
 
     <main class="main-content">
-      <section class="content-section ios-section">
+      <section class="content-section">
         <div class="section-container">
           <h1 class="page-title">现状与传承</h1>
           <p class="section-desc text-center">
@@ -315,7 +315,7 @@ onUnmounted(() => {
   position: relative;
   z-index: 10;
   flex: 1;
-  padding: 8rem 0 var(--ios-spacing-2xl);
+  padding: 8rem 0 4rem;
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
@@ -323,21 +323,21 @@ onUnmounted(() => {
 }
 
 .content-section {
-  padding: var(--ios-spacing-2xl) 0;
+  padding: 2rem 0;
 }
 
 .section-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--ios-spacing-lg);
+  padding: 0 2rem;
 }
 
 .page-title {
-  font-size: 28px;
+  font-size: 2.5rem;
   font-weight: 700;
   text-align: center;
-  margin-bottom: var(--ios-spacing-lg);
-  color: #fff;
+  margin-bottom: 3rem;
+  color: white;
   background: linear-gradient(90deg, #d4af37, #f4e4ba, #d4af37);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -345,10 +345,12 @@ onUnmounted(() => {
 }
 
 .section-desc {
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: var(--ios-spacing-xl);
-  text-align: center;
+    font-size: 1.1rem;
+    color: #E5E5EA;
+    margin-bottom: 3rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .heritage-stats {
@@ -452,11 +454,11 @@ onUnmounted(() => {
   }
   
   .section-container {
-    padding: 0 var(--ios-spacing-md);
+    padding: 0 1rem;
   }
   
   .page-title {
-    font-size: 24px;
+    font-size: 2rem;
   }
   
   .section-subtitle {

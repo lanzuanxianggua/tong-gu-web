@@ -11,7 +11,7 @@ def main():
         from django.core.management import execute_from_command_line
     except ImportError as exc:
         raise ImportError(
-            "无法导入 Django"
+            "无法导入 Django或"
             "未激活虚拟环境？"
         ) from exc
     execute_from_command_line(sys.argv)

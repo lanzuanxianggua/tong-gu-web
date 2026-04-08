@@ -787,7 +787,6 @@ a:hover {
 }
 
 .el-card__header {
-  background: var(--ios-bg-secondary);
   border-bottom: 1px solid var(--ios-border-light);
   padding: var(--ios-spacing-md) var(--ios-spacing-lg);
 }
