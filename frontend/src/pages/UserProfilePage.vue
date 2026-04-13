@@ -52,7 +52,7 @@
               </svg>
               <span>手机号码</span>
             </div>
-            <div class="info-value">{{ maskPhone(userInfo.phone) || '未绑定' }}</div>
+            <div class="info-value">{{ userInfo.phone || '未绑定' }}</div>
           </div>
 
           <div class="info-item">
@@ -63,7 +63,10 @@
               </svg>
               <span>邮箱</span>
             </div>
-            <div class="info-value">{{ maskEmail(userInfo.email) || '未绑定' }}</div>
+            <div class="info-value email-value">
+              <span>{{ userInfo.email || '未绑定' }}</span>
+              <span v-if="!userInfo.email" class="bind-btn" @click="showBindEmailDialog">立即绑定</span>
+            </div>
           </div>
 
           <div class="info-item">
@@ -142,11 +145,51 @@
         </filter>
       </defs>
     </svg>
+
+    <!-- 邮箱绑定对话框 -->
+    <div v-if="showEmailDialog" class="dialog-overlay" @click.self="closeEmailDialog">
+      <div class="email-dialog">
+        <h3 class="dialog-title">绑定邮箱</h3>
+        <div class="dialog-content">
+          <div class="form-item">
+            <label>邮箱地址</label>
+            <input
+              v-model="emailForm.email"
+              type="email"
+              placeholder="请输入邮箱地址"
+              class="dialog-input"
+            />
+          </div>
+          <div class="form-item">
+            <label>验证码</label>
+            <div class="code-input-wrapper">
+              <input
+                v-model="emailForm.code"
+                type="text"
+                placeholder="请输入验证码"
+                class="dialog-input code-input"
+              />
+              <button
+                class="send-code-btn"
+                :disabled="codeCooldown > 0"
+                @click="sendVerificationCode"
+              >
+                {{ codeCooldown > 0 ? `${codeCooldown}s` : '发送验证码' }}
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="dialog-actions">
+          <button class="dialog-btn cancel-btn" @click="closeEmailDialog">取消</button>
+          <button class="dialog-btn confirm-btn" @click="bindEmail">确认绑定</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, onMounted } from "vue";
+import { reactive, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import api from "../utils/axios";
@@ -160,18 +203,13 @@ const userInfo = reactive({
   created_at: ""
 });
 
-const maskPhone = (phone) => {
-  if (!phone) return "";
-  return phone.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2");
-};
-
-const maskEmail = (email) => {
-  if (!email) return "";
-  const [name, domain] = email.split("@");
-  if (name.length <= 2) return email;
-  const maskedName = name[0] + "***" + name[name.length - 1];
-  return maskedName + "@" + domain;
-};
+const showEmailDialog = ref(false);
+const emailForm = reactive({
+  email: "",
+  code: ""
+});
+const codeCooldown = ref(0);
+let codeTimer = null;
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
@@ -223,6 +261,72 @@ const handleLogout = async () => {
 
 const handleBackHome = () => {
   router.push("/");
+};
+
+const showBindEmailDialog = () => {
+  emailForm.email = "";
+  emailForm.code = "";
+  showEmailDialog.value = true;
+};
+
+const closeEmailDialog = () => {
+  showEmailDialog.value = false;
+  if (codeTimer) {
+    clearInterval(codeTimer);
+    codeTimer = null;
+  }
+  codeCooldown.value = 0;
+};
+
+const sendVerificationCode = async () => {
+  if (!emailForm.email) {
+    ElMessage.error("请输入邮箱地址");
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailForm.email)) {
+    ElMessage.error("请输入有效的邮箱地址");
+    return;
+  }
+
+  try {
+    await api.post("/api/users/send-code/", { email: emailForm.email, type: "bind" });
+    ElMessage.success("验证码已发送到邮箱");
+    codeCooldown.value = 60;
+    codeTimer = setInterval(() => {
+      codeCooldown.value--;
+      if (codeCooldown.value <= 0) {
+        clearInterval(codeTimer);
+        codeTimer = null;
+      }
+    }, 1000);
+  } catch (error) {
+    ElMessage.error("发送验证码失败");
+  }
+};
+
+const bindEmail = async () => {
+  if (!emailForm.email) {
+    ElMessage.error("请输入邮箱地址");
+    return;
+  }
+  if (!emailForm.code) {
+    ElMessage.error("请输入验证码");
+    return;
+  }
+
+  try {
+    const response = await api.post("/api/users/bind-email/", {
+      email: emailForm.email,
+      code: emailForm.code
+    });
+    if (response.status === 200) {
+      ElMessage.success("邮箱绑定成功");
+      userInfo.email = emailForm.email;
+      closeEmailDialog();
+    }
+  } catch (error) {
+    ElMessage.error("邮箱绑定失败");
+  }
 };
 
 onMounted(() => {
@@ -538,6 +642,157 @@ onMounted(() => {
   width: 0;
   height: 0;
   overflow: hidden;
+}
+
+.email-value {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bind-btn {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 4px;
+  color: #d4af37;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.bind-btn:hover {
+  background: rgba(212, 175, 55, 0.25);
+  border-color: rgba(212, 175, 55, 0.5);
+}
+
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.email-dialog {
+  background: linear-gradient(135deg, rgba(30, 30, 40, 0.95), rgba(20, 20, 30, 0.95));
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 16px;
+  padding: 24px;
+  width: 90%;
+  max-width: 400px;
+  backdrop-filter: blur(20px);
+}
+
+.dialog-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-item label {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dialog-input {
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.dialog-input:focus {
+  border-color: rgba(212, 175, 55, 0.5);
+}
+
+.code-input-wrapper {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.code-input {
+  flex: 1;
+}
+
+.send-code-btn {
+  padding: 0.75rem 1rem;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 8px;
+  color: #d4af37;
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.send-code-btn:hover:not(:disabled) {
+  background: rgba(212, 175, 55, 0.25);
+}
+
+.send-code-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.dialog-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.confirm-btn {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.8), rgba(180, 140, 30, 0.9));
+  border: none;
+  color: #000;
+  font-weight: 600;
+}
+
+.confirm-btn:hover {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 1), rgba(180, 140, 30, 1));
 }
 
 @media (max-width: 480px) {

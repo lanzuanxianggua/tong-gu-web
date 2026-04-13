@@ -1,0 +1,32 @@
+/* ============================================
+   Global Components & Utilities
+   全局组件样式补丁
+   ============================================ */
+
+/* 1. 图标居中修复 - 仅针对需要居中的特定图标类 */
+.feature-icon,
+.card-icon,
+.pattern-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* 卡片内容居中 - 仅针对非时间线卡片 */
+.feature-card,
+.info-card,
+.stat-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+/* 确保功能卡片内的图标容器居中（排除时间线） */
+.feature-card > *:first-child,
+.info-card > *:first-child {
+  display: flex !important;
+  justify-content: center !important;
+}

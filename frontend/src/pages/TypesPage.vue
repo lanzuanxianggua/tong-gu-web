@@ -3,10 +3,10 @@
     <!-- 背景图片 -->
     <div class="bg-image"></div>
     <!-- 导航栏 -->
-    <header class="home-nav">
+    <header class="home-nav" :class="{ scrolled: scrolled }">
       <nav :data-state="menuState ? 'active' : undefined">
-        <div :class="['home-nav-container', { scrolled: scrolled }]">
-          <div :class="['home-nav-content', { scrolled: scrolled }]">
+        <div class="home-nav-container">
+          <div class="home-nav-content">
             <div class="home-nav-brand">
               <div @click="router.push('/')" aria-label="home" class="home-logo cursor-pointer">
                 <img src="@/assets/tonggu_logo.png" alt="铜鼓智能识别与数字化保护平台" class="logo-image" />
@@ -65,7 +65,15 @@
                 </template>
                 <template v-else>
                   <div class="home-user-info">
-                    <span class="user-name">{{ userName }}</span>
+                    <span 
+                      class="user-name" 
+                      @click="router.push('/profile')"
+                      role="button"
+                      tabindex="0"
+                      aria-label="查看个人资料"
+                    >
+                      {{ userName }}
+                    </span>
                     <div class="btn-glass" @click="handleLogout">
                       <div class="btn-glass-shadow"></div>
                       <div class="btn-glass-backdrop"></div>
@@ -84,13 +92,13 @@
     <main class="main-content">
       <section class="content-section">
         <div class="section-container">
-          <h1 class="page-title gradient-text animate-fade-in">铜鼓类型</h1>
-          <p class="section-desc text-center animate-fade-in" style="animation-delay: 200ms;">
+          <h1 class="page-title gradient-text">铜鼓类型</h1>
+          <p class="section-desc text-center">
             我国学者按标准器出土地命名原则，将铜鼓分为八大类型，其中三型以广西地名命名
           </p>
           
           <!-- 铜鼓分型法介绍 -->
-          <div class="classification-intro animate-fade-in" style="animation-delay: 300ms;">
+          <div class="classification-intro">
             <h2 class="section-subtitle">铜鼓分型法</h2>
             <div class="intro-content">
               <p class="paragraph">
@@ -103,7 +111,7 @@
           </div>
           
           <!-- 铜鼓年代表 -->
-          <div class="timeline-section animate-fade-in" style="animation-delay: 400ms;">
+          <div class="timeline-section">
             <h2 class="section-subtitle">中国古代铜鼓年代表</h2>
             <div class="timeline-container">
               <div class="copper-drum-table">
@@ -172,7 +180,7 @@
           </div>
           
           <!-- 铜鼓类型关系示意图 -->
-          <div class="relationship-section animate-fade-in" style="animation-delay: 500ms;">
+          <div class="relationship-section">
             <h2 class="section-subtitle">中国古代铜鼓类型关系示意图</h2>
             <div class="relationship-container">
               <img src="../assets/tonggu04.png" alt="中国古代铜鼓类型关系示意图" class="relationship-image rounded-img shadow-lg" />
@@ -180,7 +188,7 @@
           </div>
           
           <!-- 八大类型详情 - 滑动标签页 -->
-          <div class="type-details animate-fade-in" style="animation-delay: 600ms;">
+          <div class="type-details">
             <h2 class="section-subtitle">八大类型详情</h2>
             
             <!-- 滑动标签导航 -->
@@ -271,18 +279,24 @@
         </filter>
       </defs>
     </svg>
+    
+    <!-- 回到顶部按钮 -->
+    <BackToTop />
+    
+    <!-- 页脚 -->
+    <Footer />
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, watch, nextTick, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-// 引入样式
 import '@/styles/HomePage.css'
+import BackToTop from '@/components/BackToTop.vue'
+import Footer from '@/components/Footer.vue'
 
 const router = useRouter()
 
-// 菜单项配置
 const menuItems = [
   { name: '前言', href: '/preface' },
   { name: '起源与发展', href: '/origin' },
@@ -294,20 +308,17 @@ const menuItems = [
   { name: '检测', href: '/detection' },
 ]
 
-// 响应式状态
 const menuState = ref(false)
 const scrolled = ref(false)
 const isLoggedIn = ref(false)
 const userName = ref('')
 
-// 检查登录状态
 const checkLoginStatus = () => {
   const userStr = localStorage.getItem('user')
   if (userStr) {
     try {
       const user = JSON.parse(userStr)
       isLoggedIn.value = true
-      // 尝试获取用户名，根据实际数据结构调整
       userName.value = user.username || user.name || '用户'
     } catch (e) {
       console.error('解析用户信息失败:', e)
@@ -320,32 +331,25 @@ const checkLoginStatus = () => {
   }
 }
 
-// 退出登录
 const handleLogout = () => {
-  // 清除本地存储的用户信息和token
   localStorage.removeItem('user')
   localStorage.removeItem('access_token')
   localStorage.removeItem('refresh_token')
   
-  // 更新登录状态
   isLoggedIn.value = false
   userName.value = ''
   
-  // 跳转到首页
   router.push('/')
 }
 
-// 切换菜单状态
 const toggleMenu = () => {
   menuState.value = !menuState.value
 }
 
-// 滚动监听
 const handleScroll = () => {
   scrolled.value = window.scrollY > window.innerHeight * 0.05
 }
 
-// 滑动标签页状态
 const selected = ref(0)
 const tabRefs = ref([])
 const cursorPosition = reactive({
@@ -354,21 +358,18 @@ const cursorPosition = reactive({
   opacity: 0,
 })
 
-// 计算光标样式
 const cursorStyle = computed(() => ({
   left: `${cursorPosition.left}px`,
   width: `${cursorPosition.width}px`,
   opacity: cursorPosition.opacity,
 }))
 
-// 设置 tab 引用
 const setTabRef = (el, index) => {
   if (el) {
     tabRefs.value[index] = el
   }
 }
 
-// 更新光标位置
 const updateCursorPosition = (index) => {
   const selectedTab = tabRefs.value[index]
   if (selectedTab) {
@@ -379,22 +380,15 @@ const updateCursorPosition = (index) => {
   }
 }
 
-// 监听选中变化
 watch(selected, (newVal) => {
   nextTick(() => {
     updateCursorPosition(newVal)
   })
 }, { immediate: true })
 
-// 鼠标进入事件 - 不更新光标位置
-const handleMouseEnter = (index) => {
-  // 不执行任何操作，避免鼠标悬停时显示白色背景
-}
+const handleMouseEnter = (index) => {}
 
-// 鼠标离开事件 - 不执行任何操作
-const handleMouseLeave = () => {
-  // 不执行任何操作
-}
+const handleMouseLeave = () => {}
 
 // 八大铜鼓类型数据
 const tabs = [
@@ -960,40 +954,7 @@ onUnmounted(() => {
   border-color: rgba(212, 175, 55, 0.5);
 }
 
-/* 动画效果 */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.fade-enter-to,
-.fade-leave-from {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeInUp 0.8s ease-out forwards;
-}
-
-/* 响应式设计 */
+/* Responsive Design */
 @media (max-width: 1024px) {
   .slide-tabs-list {
     flex-wrap: wrap;

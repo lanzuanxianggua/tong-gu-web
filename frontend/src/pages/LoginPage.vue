@@ -188,37 +188,25 @@ const handleSubmit = async () => {
       try {
         isLoading.value = true;
         
-        // 模拟加载动画
         await new Promise(resolve => setTimeout(resolve, 800));
         
         const response = await api.post("/api/users/login/", formData);
 
         if (response.status === 200) {
-          console.log('登录响应:', response.data);
-          
-          // 保存用户信息
           localStorage.setItem("user", JSON.stringify(response.data.user));
-          
-          // 保存 JWT token
+
           localStorage.setItem("access_token", response.data.access);
           localStorage.setItem("refresh_token", response.data.refresh);
-          
-          // 如果记住我，保存用户名
+
           if (rememberMe.value) {
             localStorage.setItem("remembered_username", formData.username);
           } else {
             localStorage.removeItem("remembered_username");
           }
-          
-          console.log('保存的 access_token:', response.data.access);
-          console.log('保存的 refresh_token:', response.data.refresh);
-          console.log('保存的 user:', response.data.user);
-          
-          // 显示成功动画
+
           isSuccess.value = true;
           ElMessage.success("登录成功，欢迎回来！");
           
-          // 延迟跳转
           setTimeout(() => {
             router.push("/");
           }, 1000);
@@ -245,12 +233,10 @@ const handleSubmit = async () => {
   });
 };
 
-// 返回首页
 const handleBackHome = () => {
   router.push("/");
 };
 
-// 页面加载时检查是否有记住的用户名
 onMounted(() => {
   const remembered = localStorage.getItem("remembered_username");
   if (remembered) {
@@ -258,11 +244,8 @@ onMounted(() => {
     rememberMe.value = true;
   }
   
-  // 尝试播放视频
   if (videoRef.value) {
-    videoRef.value.play().catch(err => {
-      console.log("视频自动播放被阻止:", err);
-    });
+    videoRef.value.play().catch(() => {});
   }
 });
 </script>

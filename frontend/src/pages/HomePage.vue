@@ -1,48 +1,58 @@
 <template>
-  <div class="flex flex-col items-center justify-center min-h-screen bg-black p-0 m-0 w-full">
-    <!-- 导航栏 -->
-    <header class="home-nav">
+  <div class="home-page-container">
+    <!-- Ambient Background Layer -->
+    <div class="ambient-bg"></div>
+    
+    <!-- Navigation System -->
+    <header 
+      class="home-nav" 
+      :class="{ scrolled: scrolled }"
+      role="banner"
+    >
       <nav
         :data-state="menuState ? 'active' : undefined"
+        aria-label="Main navigation"
       >
-        <div
-          :class="['home-nav-container', { scrolled: scrolled }]"
-        >
-          <div
-            :class="['home-nav-content', { scrolled: scrolled }]"
-          >
+        <div class="home-nav-container">
+          <div class="home-nav-content">
+            <!-- Logo & Brand -->
             <div class="home-nav-brand">
               <div
                 @click="router.push('/')"
-                aria-label="home"
-                class="home-logo cursor-pointer"
+                class="home-logo"
+                role="link"
+                tabindex="0"
+                aria-label="返回首页"
               >
                 <img
                   src="@/assets/tonggu_logo.png"
                   alt="铜鼓智能识别与数字化保护平台"
                   class="logo-image"
+                  loading="eager"
                 />
                 <span class="logo-text">铜鼓智能识别与数字化保护平台</span>
-              
               </div>
 
-              <!-- 移动端菜单切换按钮 -->
+              <!-- Mobile Menu Toggle -->
               <button
                 @click="toggleMenu"
-                :aria-label="menuState ? 'Close Menu' : 'Open Menu'"
+                :aria-label="menuState ? '关闭菜单' : '打开菜单'"
+                :aria-expanded="menuState"
                 class="home-nav-toggle"
+                type="button"
               >
                 <svg
                   :class="['home-nav-toggle-icon', { active: menuState }]"
                   xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
+                  aria-hidden="true"
                 >
                   <line x1="4" x2="20" y1="12" y2="12"/>
                   <line x1="4" x2="20" y1="6" y2="6"/>
@@ -51,58 +61,71 @@
                 <svg
                   :class="['home-nav-toggle-close', { active: menuState }]"
                   xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
+                  aria-hidden="true"
                 >
                   <path d="M18 6 6 18"/>
                   <path d="m6 6 12 12"/>
                 </svg>
               </button>
 
-              <!-- 桌面端导航链接 -->
+              <!-- Desktop Navigation Links -->
               <div class="home-nav-links">
-                <ul>
-                  <li v-for="(item, index) in menuItems" :key="index">
+                <ul role="menubar">
+                  <li v-for="(item, index) in menuItems" :key="index" role="none">
                     <div
                       @click="router.push(item.href)"
+                      @keydown.enter="router.push(item.href)"
                       class="home-nav-link cursor-pointer"
+                      role="menuitem"
+                      tabindex="0"
                     >
-                      <span>{{ item.name }}</span>
+                      {{ item.name }}
                     </div>
                   </li>
                 </ul>
               </div>
             </div>
 
-            <!-- 移动端菜单 / 桌面端按钮区域 -->
+            <!-- Mobile Menu / Actions Area -->
             <div
               :class="['home-nav-menu', { active: menuState }]"
+              role="navigation"
+              aria-label="Mobile navigation"
             >
-              <!-- 移动端导航链接 -->
+              <!-- Mobile Navigation Links -->
               <div class="home-nav-mobile">
-                <ul>
-                  <li v-for="(item, index) in menuItems" :key="index">
+                <ul role="menu">
+                  <li v-for="(item, index) in menuItems" :key="index" role="none">
                     <div
-                      @click="router.push(item.href)"
+                      @click="handleMobileNavClick(item.href)"
                       class="home-nav-link cursor-pointer"
+                      role="menuitem"
+                      tabindex="0"
                     >
-                      <span>{{ item.name }}</span>
+                      {{ item.name }}
                     </div>
                   </li>
                 </ul>
               </div>
 
-              <!-- 登录/注册按钮或用户信息 -->
+              <!-- Authentication Actions -->
               <div class="home-nav-actions">
                 <template v-if="!isLoggedIn">
-                  <!-- 登录 -->
-                  <div class="btn-glass" @click="router.push('/login')">
+                  <div 
+                    class="btn-glass" 
+                    @click="router.push('/login')"
+                    role="button"
+                    tabindex="0"
+                    aria-label="登录账户"
+                  >
                     <div class="btn-glass-shadow"></div>
                     <div class="btn-glass-backdrop"></div>
                     <div class="btn-glass-content">
@@ -110,8 +133,13 @@
                     </div>
                   </div>
                   
-                  <!-- 注册 -->
-                  <div class="btn-glass" @click="router.push('/register')">
+                  <div 
+                    class="btn-glass" 
+                    @click="router.push('/register')"
+                    role="button"
+                    tabindex="0"
+                    aria-label="注册新账户"
+                  >
                     <div class="btn-glass-shadow"></div>
                     <div class="btn-glass-backdrop"></div>
                     <div class="btn-glass-content">
@@ -119,13 +147,27 @@
                     </div>
                   </div>
                 </template>
+                
                 <template v-else>
-                  <!-- 用户信息和退出登录 -->
                   <div class="home-user-info">
-                    <span class="user-name" @click="handleProfileClick" :title="userName" style="cursor: pointer;">
+                    <span 
+                      class="user-name" 
+                      @click="handleProfileClick"
+                      :title="userName"
+                      role="button"
+                      tabindex="0"
+                      aria-label="查看个人资料"
+                    >
                       {{ userName }}
                     </span>
-                    <div class="btn-glass" @click="handleLogout">
+                    
+                    <div 
+                      class="btn-glass" 
+                      @click="handleLogout"
+                      role="button"
+                      tabindex="0"
+                      aria-label="退出登录"
+                    >
                       <div class="btn-glass-shadow"></div>
                       <div class="btn-glass-backdrop"></div>
                       <div class="btn-glass-content">
@@ -141,17 +183,19 @@
       </nav>
     </header>
     
-    <!-- 粒子效果 -->
+    <!-- Particle Animation Canvas -->
     <canvas
       ref="canvasRef"
       class="particle-canvas"
       @mousedown="handleMouseDown"
       @mouseup="handleMouseUp"
       @mousemove="handleMouseMove"
+      @mouseleave="handleMouseLeave"
       @contextmenu.prevent
+      aria-hidden="true"
     />
     
-    <!-- SVG Filter Definition -->
+    <!-- SVG Filter Definitions -->
     <svg class="svg-filters" aria-hidden="true">
       <defs>
         <filter
@@ -187,20 +231,17 @@
 </template>
 
 <script lang="ts">
-// export const DEFAULT_WORDS = ["Hello", "Welcome", "Learn","Tong Gu"]
-export const DEFAULT_WORDS = ["你好", "欢迎", "了解","铜鼓"]
-
+export const DEFAULT_WORDS = ["你好", "欢迎", "了解", "铜鼓"]
 </script>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-// 引入样式
+
 import '@/styles/HomePage.css'
 
 const router = useRouter()
 
-// 菜单项配置
 const menuItems = [
   { name: '前言', href: '/preface' },
   { name: '起源与发展', href: '/origin' },
@@ -212,82 +253,22 @@ const menuItems = [
   { name: '检测', href: '/detection' },
 ]
 
-// 响应式状态
 const menuState = ref(false)
 const scrolled = ref(false)
 const isLoggedIn = ref(false)
 const userName = ref('')
 
-// 检查登录状态
-const checkLoginStatus = () => {
-  const userStr = localStorage.getItem('user')
-  if (userStr) {
-    try {
-      const user = JSON.parse(userStr)
-      isLoggedIn.value = true
-      // 尝试获取用户名，根据实际数据结构调整
-      userName.value = user.username || user.name || '用户'
-    } catch (e) {
-      console.error('解析用户信息失败:', e)
-      isLoggedIn.value = false
-      userName.value = ''
-    }
-  } else {
-    isLoggedIn.value = false
-    userName.value = ''
-  }
-}
-
-// 退出登录
-const handleLogout = () => {
-  // 清除本地存储的用户信息和 token
-  localStorage.removeItem('user')
-  localStorage.removeItem('access_token')
-  localStorage.removeItem('refresh_token')
-  
-  // 更新登录状态
-  isLoggedIn.value = false
-  userName.value = ''
-  
-  // 跳转到首页
-  router.push('/')
-}
-
-// 跳转到个人信息页面
-const handleProfileClick = () => {
-  console.log('点击用户名，跳转到个人信息页面')
-  console.log('当前登录状态:', isLoggedIn.value)
-  console.log('用户名:', userName.value)
-  router.push('/profile')
-}
-
-// 切换菜单状态
-const toggleMenu = () => {
-  menuState.value = !menuState.value
-}
-
-// 滚动监听
-const handleScroll = () => {
-  scrolled.value = window.scrollY > window.innerHeight * 0.05
-}
-
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll, { passive: true })
-  handleScroll()
-  checkLoginStatus()
-})
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
-})
-
-// 类型定义
 interface Vector2D {
   x: number
   y: number
 }
 
-// Particle 类（保持不变）
+interface RGBColor {
+  r: number
+  g: number
+  b: number
+}
+
 class Particle {
   pos: Vector2D = { x: 0, y: 0 }
   vel: Vector2D = { x: 0, y: 0 }
@@ -300,12 +281,12 @@ class Particle {
   particleSize = 10
   isKilled = false
 
-  startColor = { r: 0, g: 0, b: 0 }
-  targetColor = { r: 0, g: 0, b: 0 }
+  startColor: RGBColor = { r: 0, g: 0, b: 0 }
+  targetColor: RGBColor = { r: 0, g: 0, b: 0 }
   colorWeight = 0
   colorBlendRate = 0.01
 
-  move() {
+  move(): void {
     let proximityMult = 1
     const distance = Math.sqrt(
       Math.pow(this.pos.x - this.target.x, 2) + 
@@ -316,23 +297,25 @@ class Particle {
       proximityMult = distance / this.closeEnoughTarget
     }
 
-    const towardsTarget = {
+    const towardsTarget: Vector2D = {
       x: this.target.x - this.pos.x,
       y: this.target.y - this.pos.y,
     }
 
     const magnitude = Math.sqrt(towardsTarget.x * towardsTarget.x + towardsTarget.y * towardsTarget.y)
+    
     if (magnitude > 0) {
       towardsTarget.x = (towardsTarget.x / magnitude) * this.maxSpeed * proximityMult
       towardsTarget.y = (towardsTarget.y / magnitude) * this.maxSpeed * proximityMult
     }
 
-    const steer = {
+    const steer: Vector2D = {
       x: towardsTarget.x - this.vel.x,
       y: towardsTarget.y - this.vel.y,
     }
 
     const steerMagnitude = Math.sqrt(steer.x * steer.x + steer.y * steer.y)
+    
     if (steerMagnitude > 0) {
       steer.x = (steer.x / steerMagnitude) * this.maxForce
       steer.y = (steer.y / steerMagnitude) * this.maxForce
@@ -345,35 +328,37 @@ class Particle {
     this.vel.y += this.acc.y
     this.pos.x += this.vel.x
     this.pos.y += this.vel.y
+    
     this.acc.x = 0
     this.acc.y = 0
   }
 
-  draw(ctx: CanvasRenderingContext2D, drawAsPoints: boolean) {
+  draw(ctx: CanvasRenderingContext2D, drawAsPoints: boolean): void {
     if (this.colorWeight < 1.0) {
       this.colorWeight = Math.min(this.colorWeight + this.colorBlendRate, 1.0)
     }
 
-    const currentColor = {
+    const currentColor: RGBColor = {
       r: Math.round(this.startColor.r + (this.targetColor.r - this.startColor.r) * this.colorWeight),
       g: Math.round(this.startColor.g + (this.targetColor.g - this.startColor.g) * this.colorWeight),
       b: Math.round(this.startColor.b + (this.targetColor.b - this.startColor.b) * this.colorWeight),
     }
 
+    ctx.fillStyle = `rgb(${currentColor.r}, ${currentColor.g}, ${currentColor.b})`
+
     if (drawAsPoints) {
-      ctx.fillStyle = `rgb(${currentColor.r}, ${currentColor.g}, ${currentColor.b})`
       ctx.fillRect(this.pos.x, this.pos.y, 2, 2)
     } else {
-      ctx.fillStyle = `rgb(${currentColor.r}, ${currentColor.g}, ${currentColor.b})`
       ctx.beginPath()
       ctx.arc(this.pos.x, this.pos.y, this.particleSize / 2, 0, Math.PI * 2)
       ctx.fill()
     }
   }
 
-  kill(width: number, height: number) {
+  kill(width: number, height: number): void {
     if (!this.isKilled) {
       const randomPos = generateRandomPos(width / 2, height / 2, (width + height) / 2)
+      
       this.target.x = randomPos.x
       this.target.y = randomPos.y
 
@@ -382,15 +367,14 @@ class Particle {
         g: this.startColor.g + (this.targetColor.g - this.startColor.g) * this.colorWeight,
         b: this.startColor.b + (this.targetColor.b - this.startColor.b) * this.colorWeight,
       }
+      
       this.targetColor = { r: 0, g: 0, b: 0 }
       this.colorWeight = 0
-
       this.isKilled = true
     }
   }
 }
 
-// Props 定义
 interface Props {
   words?: string[]
 }
@@ -399,7 +383,6 @@ const props = withDefaults(defineProps<Props>(), {
   words: () => DEFAULT_WORDS
 })
 
-// 响应式 Refs
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const animationRef = ref<number | null>(null)
 const particlesRef = ref<Particle[]>([])
@@ -415,17 +398,17 @@ const mouseRef = ref({
 const pixelSteps = 6
 const drawAsPoints = true
 
-// 工具函数
 const generateRandomPos = (x: number, y: number, mag: number): Vector2D => {
   const randomX = Math.random() * 1000
   const randomY = Math.random() * 500
 
-  const direction = {
+  const direction: Vector2D = {
     x: randomX - x,
     y: randomY - y,
   }
 
   const magnitude = Math.sqrt(direction.x * direction.x + direction.y * direction.y)
+  
   if (magnitude > 0) {
     direction.x = (direction.x / magnitude) * mag
     direction.y = (direction.y / magnitude) * mag
@@ -437,15 +420,15 @@ const generateRandomPos = (x: number, y: number, mag: number): Vector2D => {
   }
 }
 
-// 切换文字
-const nextWord = (word: string, canvas: HTMLCanvasElement) => {
+const nextWord = (word: string, canvas: HTMLCanvasElement): void => {
   const offscreenCanvas = document.createElement("canvas")
   offscreenCanvas.width = canvas.width
   offscreenCanvas.height = canvas.height
+  
   const offscreenCtx = offscreenCanvas.getContext("2d")!
 
-  offscreenCtx.fillStyle = "white"
-  offscreenCtx.font = "bold 150px Arial"
+  offscreenCtx.fillStyle = "#ffffff"
+  offscreenCtx.font = "bold 150px 'Noto Sans SC', 'Inter', sans-serif"
   offscreenCtx.textAlign = "center"
   offscreenCtx.textBaseline = "middle"
   offscreenCtx.fillText(word, canvas.width / 2, canvas.height / 2)
@@ -453,16 +436,17 @@ const nextWord = (word: string, canvas: HTMLCanvasElement) => {
   const imageData = offscreenCtx.getImageData(0, 0, canvas.width, canvas.height)
   const pixels = imageData.data
 
-  const newColor = {
-    r: Math.random() * 255,
-    g: Math.random() * 255,
-    b: Math.random() * 255,
+  const newColor: RGBColor = {
+    r: Math.floor(Math.random() * 100) + 155,
+    g: Math.floor(Math.random() * 100) + 155,
+    b: Math.floor(Math.random() * 100) + 155,
   }
 
   const particles = particlesRef.value
   let particleIndex = 0
 
   const coordsIndexes: number[] = []
+  
   for (let i = 0; i < pixels.length; i += pixelSteps * 4) {
     coordsIndexes.push(i)
   }
@@ -489,6 +473,7 @@ const nextWord = (word: string, canvas: HTMLCanvasElement) => {
       } else {
         particle = new Particle()
         const randomPos = generateRandomPos(canvas.width / 2, canvas.height / 2, (canvas.width + canvas.height) / 2)
+        
         particle.pos.x = randomPos.x
         particle.pos.y = randomPos.y
 
@@ -505,6 +490,7 @@ const nextWord = (word: string, canvas: HTMLCanvasElement) => {
         g: particle.startColor.g + (particle.targetColor.g - particle.startColor.g) * particle.colorWeight,
         b: particle.startColor.b + (particle.targetColor.b - particle.startColor.b) * particle.colorWeight,
       }
+      
       particle.targetColor = newColor
       particle.colorWeight = 0
 
@@ -518,15 +504,14 @@ const nextWord = (word: string, canvas: HTMLCanvasElement) => {
   }
 }
 
-// 动画循环
-const animate = () => {
+const animate = (): void => {
   const canvas = canvasRef.value
   if (!canvas) return
 
   const ctx = canvas.getContext("2d")!
   const particles = particlesRef.value
 
-  ctx.fillStyle = "rgba(0, 0, 0, 0.1)"
+  ctx.fillStyle = "rgba(0, 0, 0, 0.12)"
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
   for (let i = particles.length - 1; i >= 0; i--) {
@@ -552,6 +537,7 @@ const animate = () => {
         Math.pow(particle.pos.x - mouseRef.value.x, 2) + 
         Math.pow(particle.pos.y - mouseRef.value.y, 2),
       )
+      
       if (distance < 50) {
         particle.kill(canvas.width, canvas.height)
       }
@@ -559,6 +545,7 @@ const animate = () => {
   }
 
   frameCountRef.value++
+  
   if (frameCountRef.value % 240 === 0) {
     wordIndexRef.value = (wordIndexRef.value + 1) % props.words.length
     nextWord(props.words[wordIndexRef.value], canvas)
@@ -567,28 +554,32 @@ const animate = () => {
   animationRef.value = requestAnimationFrame(animate)
 }
 
-// 鼠标事件处理
-const handleMouseDown = (e: MouseEvent) => {
+const handleMouseDown = (e: MouseEvent): void => {
   mouseRef.value.isPressed = true
   mouseRef.value.isRightClick = e.button === 2
+  
   const rect = (e.target as HTMLCanvasElement).getBoundingClientRect()
   mouseRef.value.x = e.clientX - rect.left
   mouseRef.value.y = e.clientY - rect.top
 }
 
-const handleMouseUp = () => {
+const handleMouseUp = (): void => {
   mouseRef.value.isPressed = false
   mouseRef.value.isRightClick = false
 }
 
-const handleMouseMove = (e: MouseEvent) => {
+const handleMouseMove = (e: MouseEvent): void => {
   const rect = (e.target as HTMLCanvasElement).getBoundingClientRect()
   mouseRef.value.x = e.clientX - rect.left
   mouseRef.value.y = e.clientY - rect.top
 }
 
-// 工具函数
-const resizeCanvas = () => {
+const handleMouseLeave = (): void => {
+  mouseRef.value.isPressed = false
+  mouseRef.value.isRightClick = false
+}
+
+const resizeCanvas = (): void => {
   const canvas = canvasRef.value
   if (!canvas) return
 
@@ -598,8 +589,59 @@ const resizeCanvas = () => {
   nextWord(props.words[wordIndexRef.value], canvas)
 }
 
-// 生命周期
+const toggleMenu = (): void => {
+  menuState.value = !menuState.value
+}
+
+const handleMobileNavClick = (href: string): void => {
+  router.push(href)
+  menuState.value = false
+}
+
+const checkLoginStatus = (): void => {
+  const userStr = localStorage.getItem('user')
+  
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr)
+      isLoggedIn.value = true
+      userName.value = user.username || user.name || '用户'
+    } catch (e) {
+      console.error('解析用户信息失败:', e)
+      isLoggedIn.value = false
+      userName.value = ''
+    }
+  } else {
+    isLoggedIn.value = false
+    userName.value = ''
+  }
+}
+
+const handleLogout = (): void => {
+  localStorage.removeItem('user')
+  localStorage.removeItem('access_token')
+  localStorage.removeItem('refresh_token')
+  
+  isLoggedIn.value = false
+  userName.value = ''
+  
+  router.push('/')
+}
+
+const handleProfileClick = (): void => {
+  router.push('/profile')
+}
+
+const handleScroll = (): void => {
+  scrolled.value = window.scrollY > window.innerHeight * 0.05
+}
+
 onMounted(() => {
+  window.addEventListener('scroll', handleScroll, { passive: true })
+  handleScroll()
+  
+  checkLoginStatus()
+  
   const canvas = canvasRef.value
   if (!canvas) return
 
@@ -613,9 +655,11 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+  window.removeEventListener('resize', resizeCanvas)
+  
   if (animationRef.value) {
     cancelAnimationFrame(animationRef.value)
   }
-  window.removeEventListener('resize', resizeCanvas)
 })
 </script>

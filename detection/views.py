@@ -226,3 +226,16 @@ def get_user_records(request):
     records = DetectionRecord.objects.filter(user=request.user)
     serializer = DetectionRecordSerializer(records, many=True)
     return Response(serializer.data)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_detection_record(request, record_id):
+    """
+    删除指定检测记录
+    """
+    try:
+        record = DetectionRecord.objects.get(id=record_id, user=request.user)
+        record.delete()
+        return Response({'message': '记录已删除'}, status=status.HTTP_200_OK)
+    except DetectionRecord.DoesNotExist:
+        return Response({'detail': '记录不存在'}, status=status.HTTP_404_NOT_FOUND)

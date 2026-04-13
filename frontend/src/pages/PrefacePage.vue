@@ -3,16 +3,10 @@
     <!-- 背景图片 -->
     <div class="bg-image"></div>
     <!-- 导航栏 -->
-    <header class="home-nav">
-      <nav
-        :data-state="menuState ? 'active' : undefined"
-      >
-        <div
-          :class="['home-nav-container', { scrolled: scrolled }]"
-        >
-          <div
-            :class="['home-nav-content', { scrolled: scrolled }]"
-          >
+    <header class="home-nav" :class="{ scrolled: scrolled }">
+      <nav :data-state="menuState ? 'active' : undefined">
+        <div class="home-nav-container">
+          <div class="home-nav-content">
             <div class="home-nav-brand">
               <div
                 @click="router.push('/')"
@@ -123,7 +117,15 @@
                 <template v-else>
                   <!-- 用户信息和退出登录 -->
                   <div class="home-user-info">
-                    <span class="user-name">{{ userName }}</span>
+                    <span 
+                      class="user-name" 
+                      @click="router.push('/profile')"
+                      role="button"
+                      tabindex="0"
+                      aria-label="查看个人资料"
+                    >
+                      {{ userName }}
+                    </span>
                     <div class="btn-glass" @click="handleLogout">
                       <div class="btn-glass-shadow"></div>
                       <div class="btn-glass-backdrop"></div>
@@ -144,9 +146,9 @@
     <main class="main-content">
       <section class="content-section">
         <div class="section-container">
-          <h1 class="page-title gradient-text animate-fade-in">前言</h1>
+          <h1 class="page-title gradient-text">前言</h1>
           <div class="content-wrapper">
-            <div class="text-content animate-fade-in-left" style="animation-delay: 200ms;">
+            <div class="text-content">
               <p class="paragraph">
                 铜鼓，是流行于我国南方及东南亚地区长达2700多年的一种青铜礼乐器。自古以来，铜鼓与当地各民族的社会、经济、文化、生活紧密地联系在一起，形成了独特的铜鼓文化。广西被称为"铜鼓之乡"，铜鼓文化在这里世代流传并发扬光大。
               </p>
@@ -167,10 +169,10 @@
               <img
                 src="@/assets/tonggu06.png"
                 alt="铜鼓文化"
-                class="rounded-img shadow-lg hover-lift interactive-card animate-fade-in-right"
-                style="animation-delay: 400ms; width: 100%; aspect-ratio: 1; align-self: flex-start; margin-top: -70px;"
+                class="rounded-img shadow-lg hover-lift interactive-card"
+                style="width: 100%; aspect-ratio: 1; align-self: flex-start; margin-top: -70px;"
               />
-              <div class="image-caption animate-fade-in-right" style="animation-delay: 500ms; margin-top: 1rem; text-align: center; width: 100%;">铜鼓王 —— 北流云雷纹大铜鼓</div>
+              <div class="image-caption" style="margin-top: 1rem; text-align: center; width: 100%;">铜鼓王 —— 北流云雷纹大铜鼓</div>
             </div>
           </div>
         </div>
@@ -209,18 +211,24 @@
         </filter>
       </defs>
     </svg>
+    
+    <!-- 回到顶部按钮 -->
+  <BackToTop />
+  
+    <!-- 页脚 -->
+    <Footer />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-// 引入样式
 import '@/styles/HomePage.css'
+import BackToTop from '@/components/BackToTop.vue'
+import Footer from '@/components/Footer.vue'
 
 const router = useRouter()
 
-// 菜单项配置
 const menuItems = [
   { name: '前言', href: '/preface' },
   { name: '起源与发展', href: '/origin' },
@@ -232,20 +240,17 @@ const menuItems = [
   { name: '检测', href: '/detection' },
 ]
 
-// 响应式状态
 const menuState = ref(false)
 const scrolled = ref(false)
 const isLoggedIn = ref(false)
 const userName = ref('')
 
-// 检查登录状态
 const checkLoginStatus = () => {
   const userStr = localStorage.getItem('user')
   if (userStr) {
     try {
       const user = JSON.parse(userStr)
       isLoggedIn.value = true
-      // 尝试获取用户名，根据实际数据结构调整
       userName.value = user.username || user.name || '用户'
     } catch (e) {
       console.error('解析用户信息失败:', e)
@@ -258,27 +263,21 @@ const checkLoginStatus = () => {
   }
 }
 
-// 退出登录
 const handleLogout = () => {
-  // 清除本地存储的用户信息和token
   localStorage.removeItem('user')
   localStorage.removeItem('access_token')
   localStorage.removeItem('refresh_token')
   
-  // 更新登录状态
   isLoggedIn.value = false
   userName.value = ''
   
-  // 跳转到首页
   router.push('/')
 }
 
-// 切换菜单状态
 const toggleMenu = () => {
   menuState.value = !menuState.value
 }
 
-// 滚动监听
 const handleScroll = () => {
   scrolled.value = window.scrollY > window.innerHeight * 0.05
 }
@@ -472,64 +471,7 @@ onUnmounted(() => {
   transform: scale(1.02);
 }
 
-/* 动画效果 */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes fadeInRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.8s ease-out forwards;
-}
-
-.animate-fade-in-left {
-  animation: fadeInLeft 0.8s ease-out forwards;
-}
-
-.animate-fade-in-right {
-  animation: fadeInRight 0.8s ease-out forwards;
-}
-
-/* 响应式设计 */
+/* Responsive Design */
 @media (max-width: 768px) {
   .content-wrapper {
     flex-direction: column;

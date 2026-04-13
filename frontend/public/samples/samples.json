@@ -1,0 +1,207 @@
+{
+  "samples": [
+    {
+      "id": 1,
+      "name": "铜鼓图片 1",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251025_091149.jpg"
+    },
+    {
+      "id": 2,
+      "name": "铜鼓图片 2",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251025_091219.jpg"
+    },
+    {
+      "id": 3,
+      "name": "铜鼓图片 3",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251025_091224.jpg"
+    },
+    {
+      "id": 4,
+      "name": "铜鼓图片 4",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251025_091256.jpg"
+    },
+    {
+      "id": 5,
+      "name": "铜鼓图片 5",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251025_091315.jpg"
+    },
+    {
+      "id": 6,
+      "name": "铜鼓图片 6",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251025_101330.jpg"
+    },
+    {
+      "id": 7,
+      "name": "铜鼓图片 7",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251025_102918.jpg"
+    },
+    {
+      "id": 8,
+      "name": "铜鼓图片 8",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251025_103234.jpg"
+    },
+    {
+      "id": 9,
+      "name": "铜鼓图片 9",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251025_103241.jpg"
+    },
+    {
+      "id": 10,
+      "name": "铜鼓图片 10",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251025_103256.jpg"
+    },
+    {
+      "id": 11,
+      "name": "铜鼓图片 11",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251025_103416.jpg"
+    },
+    {
+      "id": 12,
+      "name": "铜鼓图片 12",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251025_103900.jpg"
+    },
+    {
+      "id": 13,
+      "name": "铜鼓图片 13",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251025_104014.jpg"
+    },
+    {
+      "id": 14,
+      "name": "铜鼓图片 14",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251025_104113.jpg"
+    },
+    {
+      "id": 15,
+      "name": "铜鼓图片 15",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251025_104116.jpg"
+    },
+    {
+      "id": 16,
+      "name": "铜鼓图片 16",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251025_104404.jpg"
+    },
+    {
+      "id": 17,
+      "name": "铜鼓图片 17",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251025_105203.jpg"
+    },
+    {
+      "id": 18,
+      "name": "铜鼓图片 18",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251228_105742.jpg"
+    },
+    {
+      "id": 19,
+      "name": "铜鼓图片 19",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251228_105811.jpg"
+    },
+    {
+      "id": 20,
+      "name": "铜鼓图片 20",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251228_110302.jpg"
+    },
+    {
+      "id": 21,
+      "name": "铜鼓图片 21",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251228_121145.jpg"
+    },
+    {
+      "id": 22,
+      "name": "铜鼓图片 22",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251228_121922.jpg"
+    },
+    {
+      "id": 23,
+      "name": "铜鼓图片 23",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251228_122010.jpg"
+    },
+    {
+      "id": 24,
+      "name": "铜鼓图片 24",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251228_122144.jpg"
+    },
+    {
+      "id": 25,
+      "name": "铜鼓图片 25",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251228_123008.jpg"
+    },
+    {
+      "id": 26,
+      "name": "铜鼓图片 26",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251228_123024.jpg"
+    },
+    {
+      "id": 27,
+      "name": "铜鼓图片 27",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251228_123223.jpg"
+    },
+    {
+      "id": 28,
+      "name": "铜鼓图片 28",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251228_123307.jpg"
+    },
+    {
+      "id": 29,
+      "name": "铜鼓图片 29",
+      "type": "铜鼓纹样",
+      "description": "铜鼓纹样示例图片",
+      "image": "IMG_20251228_123419.jpg"
+    }
+  ]
+}

@@ -210,7 +210,6 @@ const rules = {
   confirm_password: [{ required: true, message: "请确认新密码", trigger: "blur" }],
 };
 
-// 验证密码强度
 const isPasswordValid = (password) => {
   return password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password);
 };
@@ -219,20 +218,17 @@ const handleSubmit = async () => {
   if (!forgotFormRef.value) return;
 
   try {
-    // 先进行前端表单验证
     const valid = await forgotFormRef.value.validate();
     
     if (!valid) {
       return;
     }
     
-    // 验证密码强度
     if (!isPasswordValid(formData.new_password)) {
       ElMessage.error("密码强度不符合要求，请至少使用8个字符，包含大小写字母和数字");
       return;
     }
 
-    // 验证两次密码是否一致
     if (formData.new_password !== formData.confirm_password) {
       ElMessage.error("两次输入的密码不一致");
       return;
@@ -240,17 +236,12 @@ const handleSubmit = async () => {
 
     isLoading.value = true;
     
-    // 调用修改密码的API
     const response = await api.post("/api/users/forgot-password/", formData);
 
     if (response.status === 200) {
-      console.log('修改密码响应:', response.data);
-      
-      // 显示成功动画
       isSuccess.value = true;
       ElMessage.success("密码修改成功，即将返回登录页面");
       
-      // 延迟跳转
       setTimeout(() => {
         router.push("/login");
       }, 1000);
@@ -258,18 +249,14 @@ const handleSubmit = async () => {
   } catch (error) {
     isSuccess.value = false;
     
-    // 检查是否是表单验证错误
     if (error instanceof Error && error.message.includes('validation failed')) {
-      // 表单验证错误已经由Element Plus自动处理，不需要重复显示
       return;
     }
     
     const errorMsg = error.response?.data?.message || error.message;
     const errorsObj = error.response?.data?.errors || {};
     
-    // 显示具体的错误信息
     if (Object.keys(errorsObj).length > 0) {
-      // 遍历所有错误信息并显示
       Object.entries(errorsObj).forEach(([field, messages]) => {
         if (Array.isArray(messages)) {
           messages.forEach(msg => {
@@ -289,15 +276,11 @@ const handleSubmit = async () => {
   }
 };
 
-// 返回登录
 const handleBackLogin = () => {
   router.push("/login");
 };
 
-// 页面加载时的处理
-onMounted(() => {
-  // 可以在这里添加页面加载时的逻辑
-});
+onMounted(() => {});
 </script>
 
 <style scoped>
@@ -392,7 +375,7 @@ onMounted(() => {
 .grid-overlay {
   position: absolute;
   inset: 0;
-  background-image: 
+  background-image:
     linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   background-size: 50px 50px;

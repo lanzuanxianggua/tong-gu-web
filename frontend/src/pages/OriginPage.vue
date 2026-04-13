@@ -3,16 +3,10 @@
     <!-- 背景图片 -->
     <div class="bg-image"></div>
     <!-- 导航栏 -->
-    <header class="home-nav">
-      <nav
-        :data-state="menuState ? 'active' : undefined"
-      >
-        <div
-          :class="['home-nav-container', { scrolled: scrolled }]"
-        >
-          <div
-            :class="['home-nav-content', { scrolled: scrolled }]"
-          >
+    <header class="home-nav" :class="{ scrolled: scrolled }">
+      <nav :data-state="menuState ? 'active' : undefined">
+        <div class="home-nav-container">
+          <div class="home-nav-content">
             <div class="home-nav-brand">
               <div
                 @click="router.push('/')"
@@ -123,7 +117,15 @@
                 <template v-else>
                   <!-- 用户信息和退出登录 -->
                   <div class="home-user-info">
-                    <span class="user-name">{{ userName }}</span>
+                    <span 
+                      class="user-name" 
+                      @click="router.push('/profile')"
+                      role="button"
+                      tabindex="0"
+                      aria-label="查看个人资料"
+                    >
+                      {{ userName }}
+                    </span>
                     <div class="btn-glass" @click="handleLogout">
                       <div class="btn-glass-shadow"></div>
                       <div class="btn-glass-backdrop"></div>
@@ -144,15 +146,15 @@
     <main class="main-content">
       <section class="content-section">
         <div class="section-container">
-          <h1 class="page-title gradient-text animate-fade-in">起源与发展</h1>
-          <p class="section-desc text-center animate-fade-in" style="animation-delay: 200ms;">
+          <h1 class="page-title gradient-text">起源与发展</h1>
+          <p class="section-desc text-center">
             铜鼓的发展历程跨越了2700多年，从最初的炊具演变为重要的礼乐器和权力象征
           </p>
           <div class="custom-timeline">
             <div class="timeline-item">
               <div class="timeline-node"></div>
               <div class="timeline-timestamp">公元前8世纪 (春秋早期)</div>
-              <div class="timeline-content animate-fade-in-up" style="animation-delay: 200ms;">
+              <div class="timeline-content">
                 <div class="timeline-card interactive-card hover-lift">
                   <div class="timeline-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-large"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
@@ -168,7 +170,7 @@
             <div class="timeline-item">
               <div class="timeline-node"></div>
               <div class="timeline-timestamp">战国至汉代</div>
-              <div class="timeline-content animate-fade-in-up" style="animation-delay: 300ms;">
+              <div class="timeline-content">
                 <div class="timeline-card interactive-card hover-lift">
                   <div class="timeline-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-large"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
@@ -184,7 +186,7 @@
             <div class="timeline-item">
               <div class="timeline-node"></div>
               <div class="timeline-timestamp">魏晋南北朝</div>
-              <div class="timeline-content animate-fade-in-up" style="animation-delay: 400ms;">
+              <div class="timeline-content">
                 <div class="timeline-card interactive-card hover-lift">
                   <div class="timeline-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-large"><path d="M9.59 4.59A2 2 0 1 1 11 8H2"/><path d="M14.42 15.41A2 2 0 1 0 13 19H2"/><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.71 2.71"/></svg>
@@ -200,7 +202,7 @@
             <div class="timeline-item">
               <div class="timeline-node"></div>
               <div class="timeline-timestamp">唐宋时期</div>
-              <div class="timeline-content animate-fade-in-up" style="animation-delay: 500ms;">
+              <div class="timeline-content">
                 <div class="timeline-card interactive-card hover-lift">
                   <div class="timeline-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-large"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
@@ -216,7 +218,7 @@
             <div class="timeline-item">
               <div class="timeline-node"></div>
               <div class="timeline-timestamp">明清至今</div>
-              <div class="timeline-content animate-fade-in-up" style="animation-delay: 600ms;">
+              <div class="timeline-content">
                 <div class="timeline-card interactive-card hover-lift">
                   <div class="timeline-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-large"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
@@ -265,18 +267,24 @@
         </filter>
       </defs>
     </svg>
+    
+    <!-- 回到顶部按钮 -->
+    <BackToTop />
+    
+    <!-- 页脚 -->
+    <Footer />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-// 引入样式
 import '@/styles/HomePage.css'
+import BackToTop from '@/components/BackToTop.vue'
+import Footer from '@/components/Footer.vue'
 
 const router = useRouter()
 
-// 菜单项配置
 const menuItems = [
   { name: '前言', href: '/preface' },
   { name: '起源与发展', href: '/origin' },
@@ -288,20 +296,17 @@ const menuItems = [
   { name: '检测', href: '/detection' },
 ]
 
-// 响应式状态
 const menuState = ref(false)
 const scrolled = ref(false)
 const isLoggedIn = ref(false)
 const userName = ref('')
 
-// 检查登录状态
 const checkLoginStatus = () => {
   const userStr = localStorage.getItem('user')
   if (userStr) {
     try {
       const user = JSON.parse(userStr)
       isLoggedIn.value = true
-      // 尝试获取用户名，根据实际数据结构调整
       userName.value = user.username || user.name || '用户'
     } catch (e) {
       console.error('解析用户信息失败:', e)
@@ -314,27 +319,21 @@ const checkLoginStatus = () => {
   }
 }
 
-// 退出登录
 const handleLogout = () => {
-  // 清除本地存储的用户信息和token
   localStorage.removeItem('user')
   localStorage.removeItem('access_token')
   localStorage.removeItem('refresh_token')
   
-  // 更新登录状态
   isLoggedIn.value = false
   userName.value = ''
   
-  // 跳转到首页
   router.push('/')
 }
 
-// 切换菜单状态
 const toggleMenu = () => {
   menuState.value = !menuState.value
 }
 
-// 滚动监听
 const handleScroll = () => {
   scrolled.value = window.scrollY > window.innerHeight * 0.05
 }
@@ -506,24 +505,34 @@ onUnmounted(() => {
 
 .timeline-card {
   padding: 2rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: transparent;
   border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.1);
+  box-shadow: none;
   transition: all 0.3s ease;
   cursor: pointer;
 }
 
+.timeline-card:hover {
+  border-color: rgba(212, 175, 55, 0.25);
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
 .timeline-icon {
-  display: inline-block;
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, #d4af37, #f4e4ba);
+  display: inline-flex;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #d4af37 0%, #f4e4ba 50%, #d4af37 100%);
   border-radius: 50%;
-  display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    0 8px 24px rgba(212, 175, 55, 0.35),
+    0 0 0 3px rgba(212, 175, 55, 0.1);
+  position: relative;
+  overflow: hidden;
 }
 
 .icon-large {
@@ -562,38 +571,7 @@ onUnmounted(() => {
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* 动画效果 */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.8s ease-out forwards;
-}
-
-.animate-fade-in-up {
-  animation: fadeInUp 0.8s ease-out forwards;
-}
-
-/* 响应式设计 */
+/* Responsive Design */
 @media (max-width: 768px) {
   .section-container {
     padding: 0 1rem;

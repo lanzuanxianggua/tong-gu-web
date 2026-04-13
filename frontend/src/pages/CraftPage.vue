@@ -3,16 +3,10 @@
     <!-- 背景图片 -->
     <div class="bg-image"></div>
     <!-- 导航栏 -->
-    <header class="home-nav">
-      <nav
-        :data-state="menuState ? 'active' : undefined"
-      >
-        <div
-          :class="['home-nav-container', { scrolled: scrolled }]"
-        >
-          <div
-            :class="['home-nav-content', { scrolled: scrolled }]"
-          >
+    <header class="home-nav" :class="{ scrolled: scrolled }">
+      <nav :data-state="menuState ? 'active' : undefined">
+        <div class="home-nav-container">
+          <div class="home-nav-content">
             <div class="home-nav-brand">
               <div
                 @click="router.push('/')"
@@ -123,7 +117,15 @@
                 <template v-else>
                   <!-- 用户信息和退出登录 -->
                   <div class="home-user-info">
-                    <span class="user-name">{{ userName }}</span>
+                    <span 
+                      class="user-name" 
+                      @click="router.push('/profile')"
+                      role="button"
+                      tabindex="0"
+                      aria-label="查看个人资料"
+                    >
+                      {{ userName }}
+                    </span>
                     <div class="btn-glass" @click="handleLogout">
                       <div class="btn-glass-shadow"></div>
                       <div class="btn-glass-backdrop"></div>
@@ -264,13 +266,6 @@
       </section>
     </main>
 
-    <!-- 底部 -->
-    <footer class="footer">
-      <div class="footer-content">
-        <p>&copy; 2024 铜鼓智能识别与数字化保护平台. 版权所有.</p>
-      </div>
-    </footer>
-
     <!-- SVG Filter Definition -->
     <svg class="svg-filters" aria-hidden="true">
       <defs>
@@ -303,18 +298,24 @@
         </filter>
       </defs>
     </svg>
+    
+    <!-- 回到顶部按钮 -->
+    <BackToTop />
+    
+    <!-- 页脚 -->
+    <Footer />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-// 引入样式
 import '@/styles/HomePage.css'
+import BackToTop from '@/components/BackToTop.vue'
+import Footer from '@/components/Footer.vue'
 
 const router = useRouter()
 
-// 菜单项配置
 const menuItems = [
   { name: '前言', href: '/preface' },
   { name: '起源与发展', href: '/origin' },
@@ -326,20 +327,17 @@ const menuItems = [
   { name: '检测', href: '/detection' },
 ]
 
-// 响应式状态
 const menuState = ref(false)
 const scrolled = ref(false)
 const isLoggedIn = ref(false)
 const userName = ref('')
 
-// 检查登录状态
 const checkLoginStatus = () => {
   const userStr = localStorage.getItem('user')
   if (userStr) {
     try {
       const user = JSON.parse(userStr)
       isLoggedIn.value = true
-      // 尝试获取用户名，根据实际数据结构调整
       userName.value = user.username || user.name || '用户'
     } catch (e) {
       console.error('解析用户信息失败:', e)
@@ -352,27 +350,21 @@ const checkLoginStatus = () => {
   }
 }
 
-// 退出登录
 const handleLogout = () => {
-  // 清除本地存储的用户信息和token
   localStorage.removeItem('user')
   localStorage.removeItem('access_token')
   localStorage.removeItem('refresh_token')
   
-  // 更新登录状态
   isLoggedIn.value = false
   userName.value = ''
   
-  // 跳转到首页
   router.push('/')
 }
 
-// 切换菜单状态
 const toggleMenu = () => {
   menuState.value = !menuState.value
 }
 
-// 滚动监听
 const handleScroll = () => {
   scrolled.value = window.scrollY > window.innerHeight * 0.05
 }
@@ -675,25 +667,6 @@ onUnmounted(() => {
   line-height: 1.8;
   margin-bottom: 1.5rem;
   color: #E5E5EA;
-}
-
-/* 底部样式 */
-.footer {
-  padding: 3rem 0;
-  text-align: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
-.footer p {
-  color: #8E8E93;
-  font-size: 0.9rem;
-  margin: 0;
 }
 
 /* 响应式设计 */

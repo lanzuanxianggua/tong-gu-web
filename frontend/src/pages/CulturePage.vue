@@ -3,16 +3,10 @@
     <!-- 背景图片 -->
     <div class="bg-image"></div>
     <!-- 导航栏 -->
-    <header class="home-nav">
-      <nav
-        :data-state="menuState ? 'active' : undefined"
-      >
-        <div
-          :class="['home-nav-container', { scrolled: scrolled }]"
-        >
-          <div
-            :class="['home-nav-content', { scrolled: scrolled }]"
-          >
+    <header class="home-nav" :class="{ scrolled: scrolled }">
+      <nav :data-state="menuState ? 'active' : undefined">
+        <div class="home-nav-container">
+          <div class="home-nav-content">
             <div class="home-nav-brand">
               <div
                 @click="router.push('/')"
@@ -123,7 +117,15 @@
                 <template v-else>
                   <!-- 用户信息和退出登录 -->
                   <div class="home-user-info">
-                    <span class="user-name">{{ userName }}</span>
+                    <span 
+                      class="user-name" 
+                      @click="router.push('/profile')"
+                      role="button"
+                      tabindex="0"
+                      aria-label="查看个人资料"
+                    >
+                      {{ userName }}
+                    </span>
                     <div class="btn-glass" @click="handleLogout">
                       <div class="btn-glass-shadow"></div>
                       <div class="btn-glass-backdrop"></div>
@@ -232,13 +234,6 @@
       </section>
     </main>
 
-    <!-- 底部 -->
-    <footer class="footer">
-      <div class="footer-content">
-        <p>&copy; 2024 铜鼓智能识别与数字化保护平台. 版权所有.</p>
-      </div>
-    </footer>
-
     <!-- SVG Filter Definition -->
     <svg class="svg-filters" aria-hidden="true">
       <defs>
@@ -271,18 +266,24 @@
         </filter>
       </defs>
     </svg>
+    
+    <!-- 回到顶部按钮 -->
+    <BackToTop />
+    
+    <!-- 页脚 -->
+    <Footer />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-// 引入样式
 import '@/styles/HomePage.css'
+import BackToTop from '@/components/BackToTop.vue'
+import Footer from '@/components/Footer.vue'
 
 const router = useRouter()
 
-// 菜单项配置
 const menuItems = [
   { name: '前言', href: '/preface' },
   { name: '起源与发展', href: '/origin' },
@@ -294,20 +295,17 @@ const menuItems = [
   { name: '检测', href: '/detection' },
 ]
 
-// 响应式状态
 const menuState = ref(false)
 const scrolled = ref(false)
 const isLoggedIn = ref(false)
 const userName = ref('')
 
-// 检查登录状态
 const checkLoginStatus = () => {
   const userStr = localStorage.getItem('user')
   if (userStr) {
     try {
       const user = JSON.parse(userStr)
       isLoggedIn.value = true
-      // 尝试获取用户名，根据实际数据结构调整
       userName.value = user.username || user.name || '用户'
     } catch (e) {
       console.error('解析用户信息失败:', e)
@@ -320,27 +318,21 @@ const checkLoginStatus = () => {
   }
 }
 
-// 退出登录
 const handleLogout = () => {
-  // 清除本地存储的用户信息和token
   localStorage.removeItem('user')
   localStorage.removeItem('access_token')
   localStorage.removeItem('refresh_token')
   
-  // 更新登录状态
   isLoggedIn.value = false
   userName.value = ''
   
-  // 跳转到首页
   router.push('/')
 }
 
-// 切换菜单状态
 const toggleMenu = () => {
   menuState.value = !menuState.value
 }
 
-// 滚动监听
 const handleScroll = () => {
   scrolled.value = window.scrollY > window.innerHeight * 0.05
 }
@@ -420,32 +412,76 @@ onUnmounted(() => {
   font-weight: 600;
   margin-bottom: 2rem;
   color: white;
+  position: relative;
+  display: inline-block;
+  padding-left: 1rem;
+}
+
+.section-subtitle::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #d4af37, #f4e4ba);
+  border-radius: 2px;
 }
 
 .functions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2.5rem;
 }
 
 .function-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
-  padding: 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.25rem;
+  padding: 2.5rem 2rem;
   text-align: center;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.function-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
+  transform: scaleX(0);
+  transition: transform 0.4s ease;
+}
+
+.function-card:hover::before {
+  transform: scaleX(1);
 }
 
 .function-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-12px);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(212, 175, 55, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(212, 175, 55, 0.1);
 }
 
 .function-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 1.5rem;
   color: #d4af37;
+  transition: all 0.4s ease;
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.3));
+}
+
+.function-card:hover .function-icon {
+  transform: scale(1.15) rotate(5deg);
+  filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.6));
 }
 
 .function-card h3 {
@@ -453,12 +489,16 @@ onUnmounted(() => {
   font-weight: 600;
   margin-bottom: 1rem;
   color: white;
+  position: relative;
+  z-index: 1;
 }
 
 .function-card p {
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.7;
   color: #E5E5EA;
+  position: relative;
+  z-index: 1;
 }
 
 /* 文化意义 */
@@ -467,17 +507,34 @@ onUnmounted(() => {
 }
 
 .significance-content {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
-  padding: 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.25rem;
+  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.significance-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
 }
 
 .paragraph {
   font-size: 1.1rem;
-  line-height: 1.8;
+  line-height: 1.9;
   margin-bottom: 1.5rem;
   color: #E5E5EA;
+  text-align: justify;
+}
+
+.paragraph:last-child {
+  margin-bottom: 0;
 }
 
 /* 铜鼓与民族节日 */
@@ -487,22 +544,38 @@ onUnmounted(() => {
 
 .festival-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2.5rem;
 }
 
 .festival-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.25rem;
   padding: 2rem;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.festival-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.festival-card:hover::after {
+  opacity: 1;
 }
 
 .festival-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-8px);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(212, 175, 55, 0.3);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3), 0 0 16px rgba(212, 175, 55, 0.1);
 }
 
 .festival-card h3 {
@@ -510,31 +583,16 @@ onUnmounted(() => {
   font-weight: 600;
   margin-bottom: 1rem;
   color: white;
+  position: relative;
+  z-index: 1;
 }
 
 .festival-card p {
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.7;
   color: #E5E5EA;
-}
-
-/* 底部样式 */
-.footer {
-  padding: 3rem 0;
-  text-align: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
-.footer p {
-  color: #8E8E93;
-  font-size: 0.9rem;
-  margin: 0;
+  position: relative;
+  z-index: 1;
 }
 
 /* 响应式设计 */
@@ -549,15 +607,41 @@ onUnmounted(() => {
   
   .page-title {
     font-size: 2rem;
+    margin-bottom: 2rem;
   }
-  
+
   .section-subtitle {
     font-size: 1.5rem;
+    padding-left: 0.75rem;
+  }
+  
+  .section-subtitle::before {
+    width: 3px;
   }
   
   .functions-grid,
   .festival-grid {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .function-card,
+  .festival-card {
+    padding: 1.5rem;
+  }
+  
+  .significance-content {
+    padding: 1.5rem;
+  }
+}
+
+/* 动画定义 */
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
   }
 }
 </style>
