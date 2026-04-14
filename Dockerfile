@@ -1,5 +1,5 @@
-# 使用 Python 3.11 作为基础镜像
-FROM python:3.11-slim
+# 使用 Python 3.12 作为基础镜像
+FROM python:3.12-slim
 
 # 设置环境变量
 # 防止 Python 生成 .pyc 文件
