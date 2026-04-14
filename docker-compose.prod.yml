@@ -2,19 +2,19 @@ version: '3.8'
 
 services:
   backend:
-    image: ${DOCKERHUB_USERNAME}/tonggu-backend:latest
+    image: recardomlu/tonggu-backend:latest
     container_name: tonggu-backend
     restart: always
     network_mode: "host"
     environment:
-      SECRET_KEY: ${SECRET_KEY}
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT:-3306}
+      SECRET_KEY: k8fuShpFnvtBZUdWESEQ
+      DB_NAME: tonggu
+      DB_USER: tonggu
+      DB_PASSWORD: f3cbB2RzLCfX5wR4
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
       DEBUG: 'False'
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      ALLOWED_HOSTS: tong-gu.cn,www.tong-gu.cn
     volumes:
       - media_data:/app/media
       - logs_data:/app/logs
@@ -34,9 +34,8 @@ services:
       - /root/.docker/config.json:/config.json:ro
     environment:
       WATCHTOWER_CLEANUP: "true"
-      WATCHTOWER_POLL_INTERVAL: 60
-      WATCHTOWER_INCLUDE_STOPPED: "true"
-    command: --interval 60 --cleanup
+      WATCHTOWER_POLL_INTERVAL: 3600
+    command: --interval 3600 --cleanup
 
 volumes:
   media_data:
