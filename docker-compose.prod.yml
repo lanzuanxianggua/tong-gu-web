@@ -28,21 +28,19 @@ services:
              python manage.py collectstatic --noinput &&
              gunicorn --bind 0.0.0.0:8000 --workers 3 backend.wsgi:application"
 
-  nginx:
-    image: nginx:alpine
-    container_name: tonggu-nginx
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
     restart: always
-    depends_on:
-      - backend
-    ports:
-      - "80:80"
-      - "443:443"
     volumes:
-      - ./frontend/dist:/usr/share/nginx/html
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
-    networks:
-      - tonggu-network
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.docker/config.json:/config.json:ro
+    environment:
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_POLL_INTERVAL: 60
+      WATCHTOWER_INCLUDE_STOPPED: "true"
+      WATCHTOWER_LABEL_ENABLE: "true"
+    command: --interval 60 --cleanup
 
 networks:
   tonggu-network:
