@@ -30,3 +30,78 @@
   display: flex !important;
   justify-content: center !important;
 }
+
+/* ============================================
+   2. Mobile Responsive Patches
+   ============================================ */
+
+@media (max-width: 767px) {
+  /* 移动端卡片样式优化 */
+  .feature-card,
+  .info-card,
+  .stat-card {
+    padding: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+
+  /* 移动端图标尺寸调整 */
+  .feature-icon,
+  .card-icon {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  /* 移动端文字截断 */
+  .text-ellipsis {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* ============================================
+   3. Touch-Friendly Interactive Elements
+   ============================================ */
+
+@media (pointer: coarse) {
+  /* 增大移动端可点击区域 */
+  .btn,
+  button,
+  [role="button"],
+  .clickable {
+    min-height: 44px;
+    min-width: 44px;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  /* 移动端表单输入优化 */
+  input,
+  textarea,
+  select {
+    min-height: 44px;
+    font-size: 16px !important;
+  }
+}
+
+/* ============================================
+   4. Mobile Scroll Optimizations
+   ============================================ */
+
+@media (max-width: 767px) {
+  /* 平滑滚动优化 */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 隐藏滚动条但保持功能 */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}

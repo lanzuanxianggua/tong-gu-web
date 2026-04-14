@@ -827,15 +827,71 @@ onMounted(() => {
 /* 响应式 */
 @media (max-width: 480px) {
   .content-wrapper {
-    padding: 32px 24px;
+    padding: 24px 16px;
+    border-radius: 16px;
+    margin: 0 8px;
   }
-  
+
   .title {
-    font-size: 28px;
+    font-size: 24px;
   }
-  
+
+  .subtitle {
+    font-size: 12px;
+  }
+
   .social-buttons {
     gap: 8px;
+  }
+
+  .input-group {
+    margin-bottom: 12px;
+  }
+
+  :deep(.game-input .el-input__wrapper) {
+    height: 48px !important;
+    padding: 0 12px 0 40px !important;
+  }
+
+  :deep(.game-input .el-input__inner) {
+    font-size: 14px !important;
+  }
+
+  .options-row {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .login-btn {
+    height: auto;
+    padding: 14px 24px;
+    font-size: 15px;
+  }
+
+  .back-home-btn {
+    top: 12px;
+    left: 12px;
+  }
+
+  .back-home-btn .btn-glass {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .login-container {
+    max-width: 100%;
+    padding: 0 8px;
+  }
+}
+
+@media (max-width: 360px) {
+  .content-wrapper {
+    padding: 20px 12px;
+  }
+
+  .title {
+    font-size: 22px;
   }
 }
 

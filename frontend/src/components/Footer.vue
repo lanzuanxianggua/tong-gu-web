@@ -121,16 +121,58 @@ const currentYear = computed(() => new Date().getFullYear())
 
 @media (max-width: 768px) {
   .site-footer {
-    padding: 2.5rem 0 2rem;
+    padding: 2rem 0 1.5rem;
+  }
+
+  .footer-content {
+    padding: 0 1rem;
   }
 
   .footer-brand {
     flex-direction: column;
     gap: 0.75rem;
+    text-align: center;
   }
 
   .footer-info {
     align-items: center;
+  }
+
+  .footer-title {
+    font-size: 0.9rem;
+  }
+
+  .footer-subtitle {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .site-footer {
+    padding: 1.5rem 0 1rem;
+  }
+
+  .footer-logo {
+    height: 28px;
+  }
+
+  .footer-title {
+    font-size: 0.85rem;
+  }
+
+  .footer-subtitle {
+    font-size: 0.65rem;
+  }
+
+  .copyright,
+  .beian {
+    font-size: 0.7rem;
+  }
+}
+
+@supports (padding: env(safe-area-inset-bottom)) {
+  .site-footer {
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom));
   }
 }
 </style>
