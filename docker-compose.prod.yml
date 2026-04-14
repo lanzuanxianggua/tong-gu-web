@@ -5,22 +5,19 @@ services:
     image: ${DOCKERHUB_USERNAME}/tonggu-backend:latest
     container_name: tonggu-backend
     restart: always
+    network_mode: "host"
     environment:
-      SECRET_KEY: ${SECRET_KEY:-8q3!z7@y9$x2#v4%b6^n5&m1*k8(j0)p2}
+      SECRET_KEY: ${SECRET_KEY}
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT:-3306}
       DEBUG: 'False'
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
     volumes:
       - media_data:/app/media
       - logs_data:/app/logs
-    ports:
-      - "8000:8000"
-    networks:
-      - tonggu-network
     security_opt:
       - no-new-privileges:true
     command: >
@@ -34,17 +31,12 @@ services:
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ~/.docker/config.json:/config.json:ro
+      - /root/.docker/config.json:/config.json:ro
     environment:
       WATCHTOWER_CLEANUP: "true"
       WATCHTOWER_POLL_INTERVAL: 60
       WATCHTOWER_INCLUDE_STOPPED: "true"
-      WATCHTOWER_LABEL_ENABLE: "true"
     command: --interval 60 --cleanup
-
-networks:
-  tonggu-network:
-    driver: bridge
 
 volumes:
   media_data:
