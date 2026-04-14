@@ -2,6 +2,9 @@ version: '3.8'
 
 services:
   backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: recardomlu/tonggu-backend:latest
     container_name: tonggu-backend
     restart: always
