@@ -1,31 +1,11 @@
-# Django 核心框架
 Django==6.0.3
-
-# Django REST Framework
 djangorestframework==3.17.0
 djangorestframework-simplejwt==5.5.1
-
-# 数据库驱动
 mysqlclient==2.2.7
 PyMySQL==1.1.1
-
-# 图像处理
 Pillow==11.1.0
 opencv-python==4.11.0.86
 numpy==2.2.3
-
-# YOLOv11
 ultralytics==8.3.70
-
-# CORS 支持
 django-cors-headers==4.6.0
-
-# 环境变量
 python-dotenv==1.0.1
-
-# JWT 加密
-cryptography==44.0.1
-PyJWT==2.10.1
-
-# 其他工具
-requests==2.32.3
