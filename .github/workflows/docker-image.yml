@@ -43,4 +43,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          no-cache: true
+          pull: true
+          cache-from: type=local,src=tmpCache
+          cache-to: type=local,dest=tmpCache,mode=max
