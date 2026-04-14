@@ -18,8 +18,8 @@ WORKDIR /app
 # 安装系统依赖
 RUN apt-get update && apt-get install -y \
     # 图像处理依赖
-    libgl1-mesa-glx \
-    libglib2.3-0 \
+    libgl1 \
+    libglib-2.0-0 \
     libsm6 \
     libxrender1 \
     libxext6 \
