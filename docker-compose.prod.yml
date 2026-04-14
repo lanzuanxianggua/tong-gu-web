@@ -1,40 +1,17 @@
 version: '3.8'
 
 services:
-  db:
-    image: mysql:8.0
-    container_name: tonggu-db
-    restart: always
-    environment:
-      MYSQL_DATABASE: tong-gu
-      MYSQL_USER: app_user
-      MYSQL_PASSWORD: ${DB_PASSWORD:-Zx9!cV7@bN3#mK5}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-Rt6$yU8!iO9#pL2}
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - tonggu-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
-    security_opt:
-      - no-new-privileges:true
-
   backend:
     image: ${DOCKERHUB_USERNAME}/tonggu-backend:latest
     container_name: tonggu-backend
     restart: always
-    depends_on:
-      db:
-        condition: service_healthy
     environment:
       SECRET_KEY: ${SECRET_KEY:-8q3!z7@y9$x2#v4%b6^n5&m1*k8(j0)p2}
-      DB_NAME: ${DB_NAME:-tong-gu}
-      DB_USER: ${DB_USER:-app_user}
-      DB_PASSWORD: ${DB_PASSWORD:-Zx9!cV7@bN3#mK5}
-      DB_HOST: db
-      DB_PORT: 3306
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-3306}
       DEBUG: 'False'
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
     volumes:
@@ -72,6 +49,5 @@ networks:
     driver: bridge
 
 volumes:
-  mysql_data:
   media_data:
   logs_data:
