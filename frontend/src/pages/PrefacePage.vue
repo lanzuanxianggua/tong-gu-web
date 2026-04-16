@@ -165,12 +165,12 @@
                 </div>
               </div>
             </div>
-            <div style="flex: 1; max-width: 500px; display: flex; flex-direction: column; align-items: center;">
+            <div class="image-content" style="flex: 1; max-width: 500px; display: flex; flex-direction: column; align-items: center; margin-top: 2rem;">
               <img
                 src="@/assets/tonggu06.png"
                 alt="铜鼓文化"
                 class="rounded-img shadow-lg hover-lift interactive-card"
-                style="width: 100%; aspect-ratio: 1; align-self: flex-start; margin-top: -70px;"
+                style="width: 100%; aspect-ratio: 1;"
               />
               <div class="image-caption" style="margin-top: 1rem; text-align: center; width: 100%;">铜鼓王 —— 北流云雷纹大铜鼓</div>
             </div>

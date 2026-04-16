@@ -9,6 +9,9 @@
 /* Import Global Patches (图标居中等修复) */
 @import './styles/global-patches.css';
 
+/* Import Mobile Responsive Styles */
+@import './styles/mobile-responsive.css';
+
 /* ============================================
    1. Base Element Styles
    ============================================ */

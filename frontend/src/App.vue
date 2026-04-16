@@ -18,7 +18,6 @@ import './utils/scrollAnimation.js'
 const isLoading = ref(true)
 
 onMounted(() => {
-  // Simulate initial load for smooth entrance
   setTimeout(() => {
     isLoading.value = false
   }, 300)

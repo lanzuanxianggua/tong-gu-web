@@ -140,12 +140,13 @@
           <p class="section-desc text-center">
             铜鼓不仅是实用的乐器，更是精美的艺术品，其纹饰蕴含着丰富的文化内涵
           </p>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 justify-items-center">
             <div v-for="art in arts" :key="art.title" class="timeline-card interactive-card hover-lift">
               <div class="timeline-icon">
                 <svg v-if="art.icon === 'Sunny'" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-large"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
                 <svg v-else-if="art.icon === 'Compass'" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-large"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                 <svg v-else-if="art.icon === 'Brush'" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-large"><path d="M9.59 4.59A2 2 0 1 1 11 8H2"></path><path d="M14.42 15.41A2 2 0 1 0 13 19H2"></path><path d="M17.73 6.27A2.5 2.5 0 1 1 20 8H8"></path><path d="M15.58 18.41A2 2 0 1 0 17 14H8"></path></svg>
+                <svg v-else-if="art.icon === 'Cloudy'" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-large"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></svg>
               </div>
               <h3 class="timeline-title">{{ art.title }}</h3>
               <p class="timeline-text">{{ art.desc }}</p>
@@ -248,6 +249,11 @@ const arts = [
     title: "写实纹饰",
     icon: "Brush",
     desc: "包含翔鹭纹、羽人舞蹈纹、龙舟竞渡纹等，生动记录了先民狩猎、祭祀、劳作的生活场景。"
+  },
+  {
+    title: "云雷纹",
+    icon: "Cloudy",
+    desc: "以连续的云纹和雷纹构成，象征着对自然力量的崇拜。云纹代表雨水，雷纹象征天鼓，共同祈求风调雨顺。"
   }
 ];
 
@@ -387,6 +393,10 @@ onUnmounted(() => {
   padding: 1.5rem;
   transition: all 0.3s ease;
   text-align: center;
+  width: 100%;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .timeline-card:hover {

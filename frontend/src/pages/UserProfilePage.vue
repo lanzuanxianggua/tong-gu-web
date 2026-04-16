@@ -79,7 +79,7 @@
               </svg>
               <span>注册时间</span>
             </div>
-            <div class="info-value">{{ formatDate(userInfo.created_at) || '未知' }}</div>
+            <div class="info-value">{{ formatDate(userInfo.date_joined || userInfo.created_at) || '未知' }}</div>
           </div>
         </div>
 
@@ -200,7 +200,8 @@ const userInfo = reactive({
   username: "",
   phone: "",
   email: "",
-  created_at: ""
+  created_at: "",
+  date_joined: ""
 });
 
 const showEmailDialog = ref(false);
