@@ -283,9 +283,9 @@
                           
                           <p class="record-era">{{ record.era_estimate }}</p>
                           
-                          <p class="record-remark" v-if="record.remark">
-                            {{ record.remark }}
-                          </p>
+                          <div class="record-remark">
+                            <span class="record-remark-text" v-if="record.remark">{{ record.remark }}</span>
+                          </div>
                           
                           <button
                             class="delete-btn"
@@ -1323,6 +1323,9 @@ onUnmounted(() => {
 
 .record-body {
   padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  min-height: 180px;
 }
 
 .record-meta {
@@ -1351,12 +1354,30 @@ onUnmounted(() => {
 
 .record-remark {
   font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  background: var(--color-surface);
-  padding: var(--space-3);
+  color: #d1d5db;
+  background: rgba(255, 255, 255, 0.05);
+  padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-md);
   margin-bottom: var(--space-4);
-  line-height: var(--leading-relaxed);
+  display: flex;
+  align-items: center;
+  height: 32px;
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.record-remark-text {
+  white-space: nowrap;
+  overflow-x: auto;
+  flex: 1;
+  color: #d1d5db;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.record-remark-text::-webkit-scrollbar {
+  display: none;
 }
 
 .delete-btn {
@@ -1370,6 +1391,7 @@ onUnmounted(() => {
   font-weight: var(--font-medium);
   cursor: pointer;
   transition: all var(--transition-fast);
+  margin-top: auto;
 }
 
 .delete-btn:hover {
