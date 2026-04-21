@@ -165,7 +165,7 @@
                 </div>
               </div>
             </div>
-            <div class="image-content" style="flex: 1; max-width: 500px; display: flex; flex-direction: column; align-items: center; margin-top: 2rem;">
+            <div class="image-content" style="flex: 1; max-width: 500px; display: flex; flex-direction: column; align-items: center;">
               <img
                 src="@/assets/tonggu06.png"
                 alt="铜鼓文化"
@@ -415,7 +415,6 @@ onUnmounted(() => {
   aspect-ratio: 1;
   position: relative;
   align-self: flex-start;
-  margin-top: -70px;
 }
 
 .paragraph {
@@ -479,6 +478,7 @@ onUnmounted(() => {
   
   .image-content {
     max-width: 100%;
+    margin-top: 0;
   }
   
   .text-content {
@@ -491,6 +491,12 @@ onUnmounted(() => {
   
   .section-container {
     padding: 0 1rem;
+  }
+}
+
+@media (min-width: 769px) {
+  .image-content {
+    margin-top: -70px;
   }
 }
 </style>

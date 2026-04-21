@@ -294,6 +294,14 @@ import { useRouter } from 'vue-router'
 import '@/styles/HomePage.css'
 import BackToTop from '@/components/BackToTop.vue'
 import Footer from '@/components/Footer.vue'
+import tonggu_type01 from '@/assets/tonggu_type01.png'
+import tonggu_type02 from '@/assets/tonggu_type02.png'
+import tonggu_type03 from '@/assets/tonggu_type03.png'
+import tonggu_type04 from '@/assets/tonggu_type04.png'
+import tonggu_type05 from '@/assets/tonggu_type05.png'
+import tonggu_type06 from '@/assets/tonggu_type06.png'
+import tonggu_type07 from '@/assets/tonggu_type07.png'
+import tonggu_type08 from '@/assets/tonggu_type08.png'
 
 const router = useRouter()
 
@@ -402,7 +410,7 @@ const tabs = [
     description1: '万家坝型铜鼓是目前发现的最早类型的铜鼓，代表了铜鼓艺术的萌芽时期。生活在我国云南省中西部地区的濮人从炊具铜釜中创造了这种打击乐器，开启了铜鼓文化的先河。',
     description2: '此型铜鼓是铜鼓的原始形态，反映了铜鼓从炊具向乐器演变的早期阶段。它的发现对于研究铜鼓的起源和发展具有重要意义，被誉为"铜鼓之祖"。',
     culturalValue: '万家坝型铜鼓是铜鼓文化的源头，见证了古代濮人的智慧创造，为研究中国南方古代民族的历史、文化、冶金技术提供了珍贵的实物资料。',
-    image: '/src/assets/tonggu_type01.png',
+    image: tonggu_type01,
     imageCaption: '万家坝型铜鼓示意图'
   },
   {
@@ -415,7 +423,7 @@ const tabs = [
     description1: '石寨山型铜鼓以云南晋宁石寨山出土的铜鼓为代表，是铜鼓发展的鼎盛时期的代表。其纹饰生动地反映了古代滇人的社会生活和文化信仰，常见翔鹭纹、羽人舞蹈纹、龙舟竞渡纹等。',
     description2: '此型铜鼓工艺精湛，纹饰繁缛，内容丰富，是古滇国青铜文化的重要组成部分。它不仅是一种乐器，更是权力和财富的象征，在祭祀、战争、宴乐等重要场合使用。',
     culturalValue: '石寨山型铜鼓是滇国文化的标志性器物，其丰富的纹饰为研究古代滇国的社会结构、宗教信仰、生产生活提供了直观的图像资料，具有极高的历史和艺术价值。',
-    image: '/src/assets/tonggu_type02.png',
+    image: tonggu_type02,
     imageCaption: '石寨山型铜鼓示意图'
   },
   {
@@ -428,7 +436,7 @@ const tabs = [
     description1: '冷水冲型铜鼓以广西藤县冷水冲出土的铜鼓为代表，是广西地区最具代表性的铜鼓类型之一。其特点是体型硕大、通体纹饰，常见云雷纹、变形羽人纹、乘骑纹等。',
     description2: '此型铜鼓的出现标志着铜鼓文化在广西的繁荣发展，是骆越文化的重要遗存。它的分布范围广泛，影响深远，对研究岭南地区古代民族的历史文化具有重要价值。',
     culturalValue: '冷水冲型铜鼓是广西铜鼓文化的典型代表，体现了古代骆越民族高超的青铜铸造技艺和独特的审美观念，是研究岭南地区民族史、艺术史的重要实物资料。',
-    image: '/src/assets/tonggu_type03.png',
+    image: tonggu_type03,
     imageCaption: '冷水冲型铜鼓示意图'
   },
   {
@@ -441,7 +449,7 @@ const tabs = [
     description1: '北流型铜鼓以广西北流出土的铜鼓为代表，是广西地区重要的铜鼓类型之一。其特点是体型硕大、纹饰华丽，常见太阳纹、云雷纹、夔纹等，工艺精湛，气势恢宏。',
     description2: '此型铜鼓以其雄浑的体型和精美的纹饰著称，是岭南地区铜鼓文化繁荣发展的见证。它不仅是乐器，更是权力的象征，在古代社会中具有崇高的地位。',
     culturalValue: '北流型铜鼓是广西铜鼓文化的瑰宝，其宏大的体量和精美的纹饰展现了古代岭南民族的强盛与繁荣，对于研究中国古代南方民族的历史文化具有重要价值。',
-    image: '/src/assets/tonggu_type04.png',
+    image: tonggu_type04,
     imageCaption: '北流型铜鼓示意图'
   },
   {
@@ -454,7 +462,7 @@ const tabs = [
     description1: '灵山型铜鼓以广西灵山出土的铜鼓为代表，是铜鼓发展后期的代表。其特点是器形小巧玲珑，纹饰更加精细，常见花卉纹、鸟兽纹、人物纹等，工艺精湛。',
     description2: '此型铜鼓反映了铜鼓文化在唐宋时期的演变，纹饰更加世俗化和精细化，体现了当时高超的工艺水平和独特的审美趣味。它既是乐器，也是精美的艺术品。',
     culturalValue: '灵山型铜鼓是铜鼓文化后期的精品，其精细的纹饰和小巧的形制反映了铜鼓功能的转变和审美观念的变化，对于研究唐宋时期南方民族文化具有重要价值。',
-    image: '/src/assets/tonggu_type05.png',
+    image: tonggu_type05,
     imageCaption: '灵山型铜鼓示意图'
   },
   {
@@ -467,7 +475,7 @@ const tabs = [
     description1: '遵义型铜鼓以贵州遵义出土的铜鼓为代表，是铜鼓发展后期的一种类型。其特点是器形中等，鼓面较平，纹饰简化，常见几何纹和动物纹，风格朴实。',
     description2: '此型铜鼓主要分布在贵州地区，反映了铜鼓文化在贵州的发展演变。虽然纹饰简化，但仍保留了铜鼓的基本特征和文化内涵，是研究贵州少数民族历史的重要资料。',
     culturalValue: '遵义型铜鼓是贵州地区铜鼓文化的代表，体现了铜鼓文化在西南山区的传播与演变，对于研究贵州苗族、布依族等少数民族的历史文化具有重要价值。',
-    image: '/src/assets/tonggu_type06.png',
+    image: tonggu_type06,
     imageCaption: '遵义型铜鼓示意图'
   },
   {
@@ -480,7 +488,7 @@ const tabs = [
     description1: '西盟型铜鼓以云南西盟出土的铜鼓为代表，主要分布在云南西南部和东南亚地区。其特点是器形高大，鼓面较小，纹饰简单，常见几何纹和动物纹。',
     description2: '此型铜鼓是铜鼓文化在边疆地区的延续和发展，也是铜鼓文化向东南亚传播的重要见证。它在当地民族的社会生活中仍占有重要地位，至今仍在使用。',
     culturalValue: '西盟型铜鼓是铜鼓文化跨境传播的重要证据，对于研究中国与东南亚国家的文化交流、民族迁徙以及铜鼓文化的传播路径具有重要价值。',
-    image: '/src/assets/tonggu_type07.png',
+    image: tonggu_type07,
     imageCaption: '西盟型铜鼓示意图'
   },
   {
@@ -493,7 +501,7 @@ const tabs = [
     description1: '麻江型铜鼓以贵州麻江出土的铜鼓为代表，是铜鼓发展的最后阶段的代表。其特点是器形小巧，鼓面较平，纹饰简化，常见几何纹和吉祥图案，风格朴实。',
     description2: '此型铜鼓主要分布在贵州、广西等地，是铜鼓文化的延续和演变。虽然形制简化，但仍承载着丰富的文化内涵，至今仍在一些少数民族地区使用。',
     culturalValue: '麻江型铜鼓是铜鼓文化的活态遗存，至今仍在苗族、布依族等民族的重要节庆中使用，是研究铜鼓文化传承与保护的珍贵资料，具有活态文化遗产价值。',
-    image: '/src/assets/tonggu_type08.png',
+    image: tonggu_type08,
     imageCaption: '麻江型铜鼓示意图'
   }
 ]
