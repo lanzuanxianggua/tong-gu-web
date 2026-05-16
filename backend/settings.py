@@ -211,7 +211,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://www.tong-gu.cn",
     "http://tong-gu.cn",
     "http://www.tong-gu.cn",
-    "api.tong-gu.cn",
+    "https://api.tong-gu.cn",
+    "http://api.tong-gu.cn",
 ]
 
 # 允许的HTTP方法
