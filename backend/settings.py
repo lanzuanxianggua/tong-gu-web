@@ -33,7 +33,7 @@ if not DEBUG:
     # 告诉 Django 信任反向代理的 HTTPS 头
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-    SECURE_SSL_REDIRECT = True
+    SECURE_SSL_REDIRECT = _get_env('SECURE_SSL_REDIRECT', 'True').lower() == 'true'
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True

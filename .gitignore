@@ -1,9 +1,17 @@
-# 环境变量和密钥
+# 环境变量和密钥（包含敏感信息，严禁提交）
 .env
 .env.local
-/.env.production
+.env.production
+.env.*.local
+frontend/.env.production
+frontend/.env.local
+# 保留 .env.example 和 .env.prod.example 作为模板
+
+# SSL 证书和密钥
 *.pem
 *.key
+*.crt
+*.p12
 
 # Python
 __pycache__/
@@ -30,8 +38,13 @@ wheels/
 # Django
 *.log
 local_settings.py
+# Docker 敏感配置
+docker-compose.prod.yml
+
+# 数据库文件和 SQL 转储
 db.sqlite3
 db.sqlite3-journal
+*.sql
 /media
 /static
 /manifest.json
