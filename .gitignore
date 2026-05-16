@@ -1,7 +1,7 @@
 # 环境变量和密钥
 .env
 .env.local
-.env.production
+/.env.production
 *.pem
 *.key
 
