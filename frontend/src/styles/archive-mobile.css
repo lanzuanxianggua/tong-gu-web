@@ -1,0 +1,472 @@
+/* ============================================================
+   青铜档案馆 — Mobile Responsive Styles
+   Bronze Drum Pattern Detection System
+   ============================================================ */
+
+/* ============================================================
+   1. Tablet Breakpoint (max-width: 1024px)
+   ============================================================ */
+@media (max-width: 1024px) {
+  :root {
+    --text-5xl: 2.5rem;
+    --text-6xl: 3rem;
+  }
+
+  .container {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  .container-narrow {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  .grid-4col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ============================================================
+   2. Tablet Breakpoint (max-width: 768px)
+   ============================================================ */
+@media (max-width: 768px) {
+  :root {
+    --text-6xl: 2.5rem;
+    --text-5xl: 2rem;
+    --text-4xl: 1.75rem;
+    --text-3xl: 1.5rem;
+    --space-16: 3rem;
+    --space-20: 4rem;
+    --space-24: 4.5rem;
+  }
+
+  /* Container adjustments */
+  .container,
+  .container-narrow,
+  .container-wide {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  /* Grid single-column for small screens */
+  .grid-2col,
+  .grid-3col,
+  .grid-4col {
+    grid-template-columns: 1fr;
+  }
+
+  /* Section spacing compression */
+  .section {
+    padding-top: var(--space-10);
+    padding-bottom: var(--space-10);
+  }
+
+  /* Section header scale down */
+  .section-header__title {
+    font-size: var(--text-3xl) !important;
+  }
+
+  .section-header__subtitle {
+    font-size: var(--text-base) !important;
+  }
+
+  /* Stat card scale down */
+  .stat-card {
+    padding: var(--space-6) var(--space-4) !important;
+  }
+
+  .stat-card__number {
+    font-size: var(--text-4xl) !important;
+  }
+
+  /* Archive card padding compress */
+  .archive-card {
+    padding: var(--space-4) !important;
+  }
+
+  /* Info definition list stack on mobile */
+  .info-dl {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+
+  .info-dl dt {
+    white-space: normal;
+  }
+
+  /* Timeline adjust */
+  .timeline {
+    padding-left: var(--space-6);
+  }
+
+  .timeline::before {
+    left: 8px;
+  }
+
+  .timeline-item::before {
+    left: calc(-1 * var(--space-6) + 5px);
+    width: 8px;
+    height: 8px;
+    top: 4px;
+  }
+
+  /* Content prose — reduce indent on mobile */
+  .content-prose p {
+    text-indent: 1.5em;
+  }
+
+  /* Empty state */
+  .empty-state {
+    padding: var(--space-10) var(--space-4);
+  }
+
+  .empty-state__icon {
+    font-size: 36px;
+  }
+}
+
+/* ============================================================
+   3. Mobile Breakpoint (max-width: 480px)
+   ============================================================ */
+@media (max-width: 480px) {
+  :root {
+    --text-6xl: 2rem;
+    --text-5xl: 1.75rem;
+    --text-4xl: 1.5rem;
+    --text-3xl: 1.25rem;
+    --text-2xl: 1.125rem;
+    --space-12: 2.5rem;
+    --space-10: 2rem;
+    --space-8: 1.75rem;
+  }
+
+  .container,
+  .container-narrow,
+  .container-wide {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+
+  /* Button full-width on very small screens */
+  .btn-archive:not(.btn-archive--sm):not(.btn-archive--full) {
+    width: 100%;
+  }
+
+  /* Section header further reduction */
+  .section-header__title {
+    font-size: var(--text-2xl) !important;
+  }
+
+  .section-header__title::after {
+    width: 40px;
+  }
+
+  .section-header__subtitle {
+    font-size: var(--text-sm) !important;
+  }
+
+  /* Stat card compact */
+  .stat-card {
+    padding: var(--space-4) var(--space-3) !important;
+  }
+
+  .stat-card__number {
+    font-size: var(--text-3xl) !important;
+  }
+
+  .archive-card {
+    padding: var(--space-3) !important;
+  }
+
+  /* Touch target minimum 44px */
+  .btn-archive {
+    min-height: 44px;
+  }
+
+  .archive-input {
+    min-height: 44px;
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+  }
+}
+
+/* ============================================================
+   4. Navigation Mobile Styles
+   ============================================================ */
+@media (max-width: 768px) {
+  /* Hide desktop nav links, show hamburger */
+  .app-nav__desktop-links {
+    display: none !important;
+  }
+
+  .app-nav__hamburger {
+    display: flex !important;
+  }
+
+  /* Mobile menu overlay */
+  .app-nav__mobile-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-elevated);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-6);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-normal) var(--ease-out);
+  }
+
+  .app-nav__mobile-menu.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .app-nav__mobile-link {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    color: var(--text-secondary);
+    transition: color var(--duration-fast) var(--ease-out);
+    padding: var(--space-3) var(--space-6);
+  }
+
+  .app-nav__mobile-link:hover,
+  .app-nav__mobile-link.active {
+    color: var(--accent-gold);
+  }
+
+  /* Close button for mobile menu */
+  .app-nav__mobile-close {
+    position: absolute;
+    top: var(--space-6);
+    right: var(--space-6);
+    color: var(--text-muted);
+    font-size: var(--text-xl);
+    cursor: pointer;
+    padding: var(--space-2);
+    transition: color var(--duration-fast);
+  }
+
+  .app-nav__mobile-close:hover {
+    color: var(--text-primary);
+  }
+
+  /* Nav bar compact on mobile */
+  .app-nav {
+    padding: var(--space-3) var(--space-4) !important;
+  }
+
+  .app-nav__logo-text {
+    font-size: var(--text-lg) !important;
+  }
+}
+
+/* Show hamburger only on mobile, hide on desktop */
+.app-nav__hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: var(--text-xl);
+  cursor: pointer;
+  padding: var(--space-2);
+  line-height: 1;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (min-width: 769px) {
+  .app-nav__hamburger {
+    display: none;
+  }
+}
+
+/* ============================================================
+   5. Safe Area Adaptation (notched devices)
+   ============================================================ */
+@supports (padding: env(safe-area-inset-bottom)) {
+  body {
+    padding-left: env(safe-area-inset-left, 0);
+    padding-right: env(safe-area-inset-right, 0);
+  }
+
+  .app-nav {
+    padding-top: calc(var(--space-3) + env(safe-area-inset-top, 0));
+  }
+
+  .footer {
+    padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0));
+  }
+}
+
+/* ============================================================
+   6. Detection Page Mobile Layout
+   ============================================================ */
+@media (max-width: 768px) {
+  /* Detection page: split layout → stacked */
+  .detection-layout {
+    flex-direction: column;
+  }
+
+  .detection-upload,
+  .detection-results {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Upload zone full width */
+  .upload-zone {
+    min-height: 200px;
+  }
+
+  /* Result cards stack vertically */
+  .result-card {
+    max-width: 100%;
+  }
+}
+
+/* ============================================================
+   7. Types Page Mobile — Image/Info Stack
+   ============================================================ */
+@media (max-width: 768px) {
+  .type-detail {
+    flex-direction: column;
+  }
+
+  .type-detail__image {
+    width: 100% !important;
+    margin-right: 0 !important;
+    margin-bottom: var(--space-4);
+  }
+
+  /* Pill tabs scrollable */
+  .pill-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    flex-wrap: nowrap;
+  }
+
+  .pill-tabs::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ============================================================
+   8. Auth Pages Mobile
+   ============================================================ */
+@media (max-width: 480px) {
+  .auth-card {
+    margin: var(--space-4);
+    padding: var(--space-6) var(--space-4);
+    border-radius: var(--radius-md);
+  }
+
+  .auth-card__title {
+    font-size: var(--text-2xl);
+  }
+}
+
+/* ============================================================
+   9. Sample Gallery Mobile
+   ============================================================ */
+@media (max-width: 768px) {
+  .sample-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+}
+
+@media (max-width: 480px) {
+  .sample-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   10. User Profile Mobile
+   ============================================================ */
+@media (max-width: 768px) {
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-avatar {
+    margin-right: 0 !important;
+    margin-bottom: var(--space-4);
+  }
+
+  .profile-actions {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .profile-actions .btn-archive {
+    width: 100%;
+  }
+}
+
+/* ============================================================
+   11. Footer Mobile
+   ============================================================ */
+@media (max-width: 768px) {
+  .footer {
+    text-align: center;
+  }
+
+  .footer__inner {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .footer__links {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+/* ============================================================
+   12. BackToTop — Mobile position
+   ============================================================ */
+@media (max-width: 768px) {
+  .back-to-top {
+    bottom: var(--space-4);
+    right: var(--space-4);
+  }
+}
+
+/* ============================================================
+   13. Print Styles (minimal)
+   ============================================================ */
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+
+  body::before {
+    display: none;
+  }
+
+  .app-nav,
+  .back-to-top,
+  .footer {
+    display: none;
+  }
+
+  .archive-card {
+    border: 1px solid #ccc;
+    box-shadow: none;
+    break-inside: avoid;
+  }
+}

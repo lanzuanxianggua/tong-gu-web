@@ -1,36 +1,46 @@
 from rest_framework import serializers
 from .models import DetectionRecord
 import base64
-from django.conf import settings
+
+
+class DetectionRecordListSerializer(serializers.ModelSerializer):
+    """列表查询使用，包含标注图片 URL"""
+    annotated_image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DetectionRecord
+        fields = ['id', 'user', 'original_image', 'annotated_image',
+                  'annotated_image_url', 'pattern_type', 'era_estimate',
+                  'region_type', 'confidence', 'remark', 'created_at']
+        read_only_fields = ['user', 'created_at']
+
+    def get_annotated_image_url(self, obj):
+        if obj.annotated_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.annotated_image.url)
+            return obj.annotated_image.url
+        return None
+
 
 class DetectionRecordSerializer(serializers.ModelSerializer):
-    """
-    检测记录的序列化器类
-    用于将 DetectionRecord 模型实例转换为 JSON 格式，反之亦然
-    继承自 ModelSerializer，可以自动根据模型生成字段
-    """
-    # 添加计算字段，用于返回图片的 base64 数据
-    annotated_image_data = serializers.CharField(required=False, allow_blank=True, allow_null=True)
-    
+    annotated_image_data = serializers.SerializerMethodField()
+
     class Meta:
         model = DetectionRecord
         fields = '__all__'
-    
+        read_only_fields = ['user', 'created_at']
+
     def get_annotated_image_data(self, obj):
-        """
-        获取标注图片的 base64 数据
-        如果 annotated_image 存在，读取文件并转换为 base64 格式
-        """
         if obj.annotated_image:
             try:
                 image_path = obj.annotated_image.path
                 with open(image_path, 'rb') as f:
                     image_data = f.read()
-                    base64_data = base64.b64encode(image_data).decode('utf-8')
-                    if image_path.endswith('.jpg') or image_path.endswith('.jpeg'):
-                        return f"data:image/jpeg;base64,{base64_data}"
-                    else:
-                        return f"data:image/png;base64,{base64_data}"
-            except Exception as e:
+                    b64 = base64.b64encode(image_data).decode('utf-8')
+                    if image_path.lower().endswith(('.jpg', '.jpeg')):
+                        return f"data:image/jpeg;base64,{b64}"
+                    return f"data:image/png;base64,{b64}"
+            except Exception:
                 return None
         return None

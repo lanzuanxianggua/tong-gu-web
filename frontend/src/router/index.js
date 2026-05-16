@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -84,19 +85,16 @@ const router = createRouter({
   ]
 })
 
-// 添加路由守卫，只有检测页面需要登录
+// Auth guard — 使用 auth store 的 isLoggedIn 状态
 router.beforeEach((to, from, next) => {
-  const user = localStorage.getItem('user')
+  const auth = useAuthStore()
+  const loggedIn = auth.isLoggedIn
 
-  // 如果访问需要认证的页面且未登录，跳转到登录页
-  if (to.meta.requiresAuth && !user) {
-    next({ name: 'login' })
-  }
-  // 如果已登录但访问登录/注册/忘记密码页，跳转到首页
-  else if (user && (to.name === 'login' || to.name === 'register' || to.name === 'forgot-password')) {
+  if (to.meta.requiresAuth && !loggedIn) {
+    next({ name: 'login', query: { redirect: to.fullPath } })
+  } else if (loggedIn && (to.name === 'login' || to.name === 'register' || to.name === 'forgot-password')) {
     next({ name: 'home' })
-  }
-  else {
+  } else {
     next()
   }
 })

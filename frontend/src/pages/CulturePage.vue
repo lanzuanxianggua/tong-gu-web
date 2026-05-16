@@ -1,647 +1,254 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-black text-white relative overflow-hidden">
-    <!-- 背景图片 -->
-    <div class="bg-image"></div>
-    <!-- 导航栏 -->
-    <header class="home-nav" :class="{ scrolled: scrolled }">
-      <nav :data-state="menuState ? 'active' : undefined">
-        <div class="home-nav-container">
-          <div class="home-nav-content">
-            <div class="home-nav-brand">
-              <div
-                @click="router.push('/')"
-                aria-label="home"
-                class="home-logo cursor-pointer"
-              >
-                <img
-                  src="@/assets/tonggu_logo.png"
-                  alt="铜鼓智能识别与数字化保护平台"
-                  class="logo-image"
-                />
-                <span class="logo-text">铜鼓智能识别与数字化保护平台</span>
-              </div>
+  <div class="culture-page">
+    <SectionHeader
+      :title="t('pages.culture.title')"
+      :subtitle="t('pages.culture.subtitle')"
+    />
 
-              <!-- 移动端菜单切换按钮 -->
-              <button
-                @click="toggleMenu"
-                :aria-label="menuState ? 'Close Menu' : 'Open Menu'"
-                class="home-nav-toggle"
-              >
-                <svg
-                  :class="['home-nav-toggle-icon', { active: menuState }]"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <line x1="4" x2="20" y1="12" y2="12"/>
-                  <line x1="4" x2="20" y1="6" y2="6"/>
-                  <line x1="4" x2="20" y1="18" y2="18"/>
-                </svg>
-                <svg
-                  :class="['home-nav-toggle-close', { active: menuState }]"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M18 6 6 18"/>
-                  <path d="m6 6 12 12"/>
-                </svg>
-              </button>
-
-              <!-- 桌面端导航链接 -->
-              <div class="home-nav-links">
-                <ul>
-                  <li v-for="(item, index) in menuItems" :key="index">
-                    <div
-                      @click="router.push(item.href)"
-                      class="home-nav-link cursor-pointer"
-                    >
-                      <span>{{ item.name }}</span>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <!-- 移动端菜单 / 桌面端按钮区域 -->
-            <div
-              :class="['home-nav-menu', { active: menuState }]"
-            >
-              <!-- 移动端导航链接 -->
-              <div class="home-nav-mobile">
-                <ul>
-                  <li v-for="(item, index) in menuItems" :key="index">
-                    <div
-                      @click="router.push(item.href)"
-                      class="home-nav-link cursor-pointer"
-                    >
-                      <span>{{ item.name }}</span>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-
-              <!-- 登录/注册按钮或用户信息 -->
-              <div class="home-nav-actions">
-                <template v-if="!isLoggedIn">
-                  <!-- 登录 -->
-                  <div class="btn-glass" @click="router.push('/login')">
-                    <div class="btn-glass-shadow"></div>
-                    <div class="btn-glass-backdrop"></div>
-                    <div class="btn-glass-content">
-                      <span>登录</span>
-                    </div>
-                  </div>
-                  
-                  <!-- 注册 -->
-                  <div class="btn-glass" @click="router.push('/register')">
-                    <div class="btn-glass-shadow"></div>
-                    <div class="btn-glass-backdrop"></div>
-                    <div class="btn-glass-content">
-                      <span>注册</span>
-                    </div>
-                  </div>
-                </template>
-                <template v-else>
-                  <!-- 用户信息和退出登录 -->
-                  <div class="home-user-info">
-                    <span 
-                      class="user-name" 
-                      @click="router.push('/profile')"
-                      role="button"
-                      tabindex="0"
-                      aria-label="查看个人资料"
-                    >
-                      {{ userName }}
-                    </span>
-                    <div class="btn-glass" @click="handleLogout">
-                      <div class="btn-glass-shadow"></div>
-                      <div class="btn-glass-backdrop"></div>
-                      <div class="btn-glass-content">
-                        <span>退出登录</span>
-                      </div>
-                    </div>
-                  </div>
-                </template>
-              </div>
-            </div>
-          </div>
+    <!-- 主要功能 -->
+    <section class="section">
+      <div class="container-narrow">
+        <h2 class="section-label">{{ t('pages.culture.mainFunctions') }}</h2>
+        <div class="grid-3col">
+          <ArchiveCard
+            v-for="(item, index) in functionList"
+            :key="index"
+            hoverable
+            class="function-card animate-fade-in-up"
+            :class="`delay-${index + 1}`"
+          >
+            <div class="function-card__icon" v-html="item.icon"></div>
+            <h3 class="function-card__title">{{ item.title }}</h3>
+            <p class="function-card__desc">{{ item.desc }}</p>
+          </ArchiveCard>
         </div>
-      </nav>
-    </header>
+      </div>
+    </section>
 
-    <main class="main-content">
-      <section class="content-section">
-        <div class="section-container">
-          <h1 class="page-title">文化功能</h1>
-          <p class="section-desc text-center">
-            铜鼓不仅是一种乐器，更是西南少数民族文化的重要象征，具有多种文化功能
-          </p>
+    <div class="container-narrow">
+      <BronzeDivider decorated />
+    </div>
 
-          <!-- 功能分类 -->
-          <div class="culture-functions">
-            <h2 class="section-subtitle">主要功能</h2>
-            <div class="functions-grid">
-              <div class="function-card">
-                <div class="function-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-9 9c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9z"></path><polyline points="9 10 12 13 22 4"></polyline></svg>
-                </div>
-                <h3>祭祀仪式</h3>
-                <p>铜鼓是祭祀活动中的重要礼器，用于祈求神灵保佑、驱邪避灾。在重大节日和宗教仪式中，人们会敲击铜鼓，表达对神灵的敬意。</p>
-              </div>
-              <div class="function-card">
-                <div class="function-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-                </div>
-                <h3>音乐艺术</h3>
-                <p>铜鼓是一种打击乐器，具有独特的音色和演奏方式。在民族音乐中，铜鼓是重要的伴奏乐器，能够营造出热烈、庄重的氛围。</p>
-              </div>
-              <div class="function-card">
-                <div class="function-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                </div>
-                <h3>社会象征</h3>
-                <p>铜鼓是权力和财富的象征，在古代社会中，拥有铜鼓的多少往往代表着地位的高低。铜鼓也是民族认同的重要标志。</p>
-              </div>
-              <div class="function-card">
-                <div class="function-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
-                </div>
-                <h3>文化传承</h3>
-                <p>铜鼓上的纹饰和图案记录了民族的历史、神话和生活场景，是研究民族文化的重要资料，承载着丰富的文化信息。</p>
-              </div>
-              <div class="function-card">
-                <div class="function-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                </div>
-                <h3>军事用途</h3>
-                <p>铜鼓在古代被用作军事信号，用于指挥作战和传递信息。在战争中，铜鼓的声音可以鼓舞士气，震慑敌人。</p>
-              </div>
-              <div class="function-card">
-                <div class="function-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-                </div>
-                <h3>贸易交换</h3>
-                <p>铜鼓在古代西南地区的贸易中扮演着重要角色，是一种贵重的交换媒介。拥有铜鼓的多少往往代表着财富的多少。</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- 文化意义 -->
-          <div class="cultural-significance">
-            <h2 class="section-subtitle">文化意义</h2>
-            <div class="significance-content">
-              <p class="paragraph">
-                铜鼓文化是西南少数民族文化的重要组成部分，它不仅体现了古代工匠的精湛技艺，也反映了各民族的历史、宗教、艺术和社会生活。铜鼓的存在，为我们了解古代西南地区的文化交流和民族融合提供了宝贵的实物资料。
-              </p>
-              <p class="paragraph">
-                在现代社会，铜鼓文化依然发挥着重要作用。它是民族文化认同的象征，也是民族团结的纽带。通过铜鼓文化的传承和发展，我们可以更好地保护和弘扬中华民族的优秀传统文化，增强民族凝聚力和文化自信。
-              </p>
-            </div>
-          </div>
-
-          <!-- 铜鼓与民族节日 -->
-          <div class="festival-connection">
-            <h2 class="section-subtitle">铜鼓与民族节日</h2>
-            <div class="festival-grid">
-              <div class="festival-card">
-                <h3>壮族三月三（歌圩节）</h3>
-                <p>壮族最重要的传统节日，又称"歌圩节"。节日期间人们身着民族盛装，敲击铜鼓、载歌载舞庆祝。铜鼓是节日庆典的核心乐器，用于祭祀祖先、庆祝丰收，体现了壮族深厚的铜鼓文化底蕴。</p>
-              </div>
-              <div class="festival-card">
-                <h3>瑶族盘王节（祝著节）</h3>
-                <p>瑶族传统重要节日，纪念祖先盘王。在节日庆典中使用铜鼓进行祭祀和庆祝活动。铜鼓作为宗教仪式和节庆活动的重要组成部分，承载着瑶族对祖先的敬仰。</p>
-              </div>
-              <div class="festival-card">
-                <h3>水族铜鼓节</h3>
-                <p>水族的传统节日，通常在清明节后举行。铜鼓被视为权力、财富和图腾崇拜的象征，在节庆活动中广泛使用。体现了水族独特的铜鼓文化传统和民族特色。</p>
-              </div>
-            </div>
-          </div>
+    <!-- 文化意义 -->
+    <section class="section">
+      <div class="container-narrow">
+        <h2 class="section-label">{{ t('pages.culture.culturalSignificance') }}</h2>
+        <div class="significance-block content-prose">
+          <p>{{ t('pages.culture.significanceP1') }}</p>
+          <p>{{ t('pages.culture.significanceP2') }}</p>
         </div>
-      </section>
-    </main>
+      </div>
+    </section>
 
-    <!-- SVG Filter Definition -->
-    <svg class="svg-filters" aria-hidden="true">
-      <defs>
-        <filter
-          id="container-glass"
-          x="0%"
-          y="0%"
-          width="100%"
-          height="100%"
-          color-interpolation-filters="sRGB"
-        >
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.05 0.05"
-            numOctaves="1"
-            seed="1"
-            result="turbulence"
-          />
-          <feGaussianBlur in="turbulence" stdDeviation="2" result="blurredNoise" />
-          <feDisplacementMap
-            in="SourceGraphic"
-            in2="blurredNoise"
-            scale="70"
-            xChannelSelector="R"
-            yChannelSelector="B"
-            result="displaced"
-          />
-          <feGaussianBlur in="displaced" stdDeviation="4" result="finalBlur" />
-          <feComposite in="finalBlur" in2="finalBlur" operator="over" />
-        </filter>
-      </defs>
-    </svg>
-    
-    <!-- 回到顶部按钮 -->
-    <BackToTop />
-    
-    <!-- 页脚 -->
-    <Footer />
+    <div class="container-narrow">
+      <BronzeDivider decorated />
+    </div>
+
+    <!-- 铜鼓与民族节日 -->
+    <section class="section">
+      <div class="container-narrow">
+        <h2 class="section-label">{{ t('pages.culture.festivals') }}</h2>
+        <div class="grid-3col">
+          <ArchiveCard
+            v-for="(item, index) in festivalList"
+            :key="index"
+            hoverable
+            class="festival-card animate-fade-in-up"
+            :class="`delay-${index + 1}`"
+          >
+            <h3 class="festival-card__title">{{ item.title }}</h3>
+            <p class="festival-card__desc">{{ item.desc }}</p>
+          </ArchiveCard>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
-import '@/styles/HomePage.css'
-import BackToTop from '@/components/BackToTop.vue'
-import Footer from '@/components/Footer.vue'
+import SectionHeader from '@/components/SectionHeader.vue'
+import BronzeDivider from '@/components/BronzeDivider.vue'
+import ArchiveCard from '@/components/ArchiveCard.vue'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-const router = useRouter()
+const { t, tm } = useI18n()
 
-const menuItems = [
-  { name: '前言', href: '/preface' },
-  { name: '起源与发展', href: '/origin' },
-  { name: '制作工艺', href: '/craft' },
-  { name: '铜鼓类型', href: '/types' },
-  { name: '艺术特色', href: '/art' },
-  { name: '文化功能', href: '/culture' },
-  { name: '现状', href: '/status' },
-  { name: '检测', href: '/detection' },
+interface FunctionItem {
+  title: string
+  desc: string
+  icon: string
+}
+
+interface FestivalItem {
+  title: string
+  desc: string
+}
+
+const functionIcons = [
+  '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>',
+  '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',
+  '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
+  '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>',
 ]
 
-const menuState = ref(false)
-const scrolled = ref(false)
-const isLoggedIn = ref(false)
-const userName = ref('')
-
-const checkLoginStatus = () => {
-  const userStr = localStorage.getItem('user')
-  if (userStr) {
-    try {
-      const user = JSON.parse(userStr)
-      isLoggedIn.value = true
-      userName.value = user.username || user.name || '用户'
-    } catch (e) {
-      console.error('解析用户信息失败:', e)
-      isLoggedIn.value = false
-      userName.value = ''
-    }
-  } else {
-    isLoggedIn.value = false
-    userName.value = ''
-  }
-}
-
-const handleLogout = () => {
-  localStorage.removeItem('user')
-  localStorage.removeItem('access_token')
-  localStorage.removeItem('refresh_token')
-  
-  isLoggedIn.value = false
-  userName.value = ''
-  
-  router.push('/')
-}
-
-const toggleMenu = () => {
-  menuState.value = !menuState.value
-}
-
-const handleScroll = () => {
-  scrolled.value = window.scrollY > window.innerHeight * 0.05
-}
-
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll, { passive: true })
-  handleScroll()
-  checkLoginStatus()
+const functionList = computed<FunctionItem[]>(() => {
+  const items = tm('pages.culture.functionList') as unknown as { title: string; desc: string }[]
+  return Array.isArray(items) ? items.map((item, i) => ({ ...item, icon: functionIcons[i] || '' })) : []
 })
 
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
+const festivalList = computed<FestivalItem[]>(() => {
+  const items = tm('pages.culture.festivalList') as unknown as FestivalItem[]
+  return Array.isArray(items) ? items : []
 })
 </script>
 
 <style scoped>
-/* 背景图片 */
-.bg-image {
-  position: fixed;
-  inset: 0;
-  background-image: url('@/assets/tonggu07.png');
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-  z-index: 0;
-  opacity: 0.5;
+.culture-page {
+  padding-top: var(--space-12);
+  padding-bottom: var(--space-16);
+  animation: fadeIn var(--duration-normal) var(--ease-out) both;
 }
 
-/* 主内容区域 */
-.main-content {
+/* 区域标签 */
+.section-label {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-8);
   position: relative;
-  z-index: 10;
-  flex: 1;
-  padding: 8rem 0 4rem;
-  width: 100%;
-  overflow-y: auto;
+  padding-left: var(--space-4);
 }
 
-.content-section {
-  padding: 2rem 0;
-}
-
-.section-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
-.page-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 3rem;
-  color: white;
-  background: linear-gradient(90deg, #d4af37, #f4e4ba, #d4af37);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.section-desc {
-  font-size: 1.1rem;
-  color: #E5E5EA;
-  margin-bottom: 3rem;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* 功能分类 */
-.culture-functions {
-  margin-bottom: 4rem;
-}
-
-.section-subtitle {
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin-bottom: 2rem;
-  color: white;
-  position: relative;
-  display: inline-block;
-  padding-left: 1rem;
-}
-
-.section-subtitle::before {
+.section-label::before {
   content: '';
   position: absolute;
   left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 4px;
-  height: 100%;
-  background: linear-gradient(180deg, #d4af37, #f4e4ba);
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--accent-gold), var(--accent-copper));
   border-radius: 2px;
 }
 
-.functions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2.5rem;
-}
-
+/* 功能卡片 */
 .function-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1.25rem;
-  padding: 2.5rem 2rem;
   text-align: center;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
 }
 
-.function-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
-  transform: scaleX(0);
-  transition: transform 0.4s ease;
-}
-
-.function-card:hover::before {
-  transform: scaleX(1);
-}
-
-.function-card:hover {
-  transform: translateY(-12px);
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(212, 175, 55, 0.3);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(212, 175, 55, 0.1);
-}
-
-.function-icon {
+.function-card__icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1.5rem;
-  color: #d4af37;
-  transition: all 0.4s ease;
-  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.3));
+  margin-bottom: var(--space-4);
+  color: var(--accent-gold);
+  filter: drop-shadow(0 0 6px rgba(201, 162, 39, 0.25));
+  transition: all var(--duration-normal) var(--ease-out);
 }
 
-.function-card:hover .function-icon {
-  transform: scale(1.15) rotate(5deg);
-  filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.6));
+.function-card:hover .function-card__icon {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 12px rgba(201, 162, 39, 0.5));
 }
 
-.function-card h3 {
-  font-size: 1.3rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: white;
-  position: relative;
-  z-index: 1;
+.function-card__title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-3);
 }
 
-.function-card p {
-  font-size: 1rem;
-  line-height: 1.7;
-  color: #E5E5EA;
-  position: relative;
-  z-index: 1;
+.function-card__desc {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+  margin: 0;
 }
 
 /* 文化意义 */
-.cultural-significance {
-  margin-bottom: 4rem;
-}
-
-.significance-content {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1.25rem;
-  padding: 2.5rem;
+.significance-block {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--space-8);
   position: relative;
   overflow: hidden;
 }
 
-.significance-content::before {
+.significance-block::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+  opacity: 0.4;
 }
 
-.paragraph {
-  font-size: 1.1rem;
-  line-height: 1.9;
-  margin-bottom: 1.5rem;
-  color: #E5E5EA;
+.significance-block p {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
   text-align: justify;
 }
 
-.paragraph:last-child {
-  margin-bottom: 0;
-}
-
-/* 铜鼓与民族节日 */
-.festival-connection {
-  margin-bottom: 4rem;
-}
-
-.festival-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2.5rem;
-}
-
+/* 节日卡片 */
 .festival-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1.25rem;
-  padding: 2rem;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-.festival-card::after {
+.festival-card__title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--accent-gold-light);
+  margin-bottom: var(--space-3);
+  position: relative;
+  padding-bottom: var(--space-3);
+}
+
+.festival-card__title::after {
   content: '';
   position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
-  opacity: 0;
-  transition: opacity 0.4s ease;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-gold), transparent);
 }
 
-.festival-card:hover::after {
-  opacity: 1;
+.festival-card__desc {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+  margin: 0;
 }
 
-.festival-card:hover {
-  transform: translateY(-8px);
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(212, 175, 55, 0.3);
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3), 0 0 16px rgba(212, 175, 55, 0.1);
-}
-
-.festival-card h3 {
-  font-size: 1.3rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: white;
-  position: relative;
-  z-index: 1;
-}
-
-.festival-card p {
-  font-size: 1rem;
-  line-height: 1.7;
-  color: #E5E5EA;
-  position: relative;
-  z-index: 1;
-}
-
-/* 响应式设计 */
+/* 响应式 */
 @media (max-width: 768px) {
-  .main-content {
-    padding: 6rem 0 3rem;
-  }
-  
-  .section-container {
-    padding: 0 1rem;
-  }
-  
-  .page-title {
-    font-size: 2rem;
-    margin-bottom: 2rem;
+  .culture-page {
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-10);
   }
 
-  .section-subtitle {
-    font-size: 1.5rem;
-    padding-left: 0.75rem;
-  }
-  
-  .section-subtitle::before {
-    width: 3px;
-  }
-  
-  .functions-grid,
-  .festival-grid {
+  .grid-3col {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
   }
-  
-  .function-card,
-  .festival-card {
-    padding: 1.5rem;
-  }
-  
-  .significance-content {
-    padding: 1.5rem;
+
+  .significance-block {
+    padding: var(--space-6);
   }
 }
 
-/* 动画定义 */
-@keyframes shimmer {
-  0% {
-    background-position: -200% center;
-  }
-  100% {
-    background-position: 200% center;
+@media (min-width: 769px) and (max-width: 1024px) {
+  .grid-3col {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 </style>

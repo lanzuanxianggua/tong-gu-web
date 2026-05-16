@@ -1,1571 +1,1082 @@
 <template>
   <div class="detection-page">
-    <!-- 动态背景 -->
-    <div class="bg-image"></div>
+    <div class="detection-container">
+      <SectionHeader :title="t('detection.title')" :subtitle="t('detection.subtitle')" />
 
-    <!-- 导航栏 -->
-    <header class="home-nav" :class="{ scrolled: scrolled }">
-      <nav :data-state="menuState ? 'active' : undefined">
-        <div class="home-nav-container">
-          <div class="home-nav-content">
-            <!-- Logo -->
-            <div class="home-nav-brand">
-              <div @click="router.push('/')" class="home-logo cursor-pointer">
-                <img src="@/assets/tonggu_logo.png" alt="铜鼓智能识别平台" class="logo-image" />
-                <span class="logo-text">铜鼓智能识别与数字化保护平台</span>
+      <el-tabs v-model="activeTab" class="detection-tabs">
+        <!-- Tab 1: Smart Detection -->
+        <el-tab-pane :label="t('detection.smartDetection')" name="detect">
+          <!-- 状态1：未选择图片 → 上传区 -->
+          <div v-if="!det.currentImage && !det.detecting" class="upload-standalone">
+            <div
+              class="upload-zone"
+              :class="{ 'upload-zone--active': isDragOver }"
+              @click="triggerFileInput"
+            >
+              <input ref="fileInput" type="file" accept="image/*" @change="handleFileSelect" style="display:none" />
+              <div class="upload-zone__empty" @dragover.prevent="isDragOver = true" @dragleave="isDragOver = false" @drop="handleDrop">
+                <div class="upload-zone__deco">
+                  <span class="upload-zone__corner upload-zone__corner--tl"></span>
+                  <span class="upload-zone__corner upload-zone__corner--tr"></span>
+                  <span class="upload-zone__corner upload-zone__corner--bl"></span>
+                  <span class="upload-zone__corner upload-zone__corner--br"></span>
+                  <div class="upload-zone__icon-wrap">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  </div>
+                </div>
+                <p class="upload-zone__text">{{ t('detection.uploadHint') }}</p>
+                <p class="upload-zone__hint">{{ t('detection.uploadFormatHint') }}</p>
               </div>
+            </div>
+            <div v-if="!selectedFile" class="sample-link">
+              <router-link to="/samples" class="sample-link__btn">
+                {{ t('detection.goToSampleGallery') }} <span class="sample-link__arrow">&rarr;</span>
+              </router-link>
+            </div>
+          </div>
 
-              <!-- 移动端菜单按钮 -->
-              <button @click="toggleMenu" class="home-nav-toggle">
-                <svg :class="['home-nav-toggle-icon', { active: menuState }]" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>
-                </svg>
-                <svg :class="['home-nav-toggle-close', { active: menuState }]" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-                </svg>
-              </button>
+          <!-- 状态2：已选图片，待检测 → 预览 + 按钮 -->
+          <div v-else-if="selectedFile && !det.detecting && !det.hasCurrentResults" class="preview-state">
+            <div class="preview-frame">
+              <img :src="det.currentImage" alt="预览" class="preview-image" />
+            </div>
+            <div class="preview-actions">
+              <ArchiveButton variant="primary" @click="runDetection">
+                {{ t('detection.startDetection') }}
+              </ArchiveButton>
+              <ArchiveButton variant="ghost" size="sm" @click="triggerFileInput">
+                {{ t('detection.uploadHint') }}
+              </ArchiveButton>
+              <ArchiveButton variant="ghost" size="sm" @click="clearUpload">
+                {{ t('detection.clearImage') }}
+              </ArchiveButton>
+            </div>
+          </div>
 
-              <!-- 桌面导航 -->
-              <div class="home-nav-links">
-                <ul>
-                  <li v-for="(item, index) in menuItems" :key="index">
-                    <div @click="router.push(item.href)" class="home-nav-link cursor-pointer">{{ item.name }}</div>
-                  </li>
-                </ul>
+          <!-- 状态3：检测中 -->
+          <div v-else-if="det.detecting" class="detecting-state">
+            <div class="detecting-orb">
+              <div class="detecting-orb__ring"></div>
+              <div class="detecting-orb__ring detecting-orb__ring--outer"></div>
+              <div class="detecting-orb__core"></div>
+            </div>
+            <p class="detecting-state__text">{{ t('detection.analyzingPatterns') }}</p>
+            <p class="detecting-state__sub">YOLOv11</p>
+          </div>
+
+          <!-- 状态4：检测结果 → 图片 + 侧边栏 -->
+          <div v-else class="result-workspace">
+            <!-- 左侧：标注图片 -->
+            <div class="result-image-panel">
+              <div class="result-image-frame">
+                <img :src="det.currentImage" alt="检测结果" class="result-image" />
+              </div>
+              <div class="result-image-actions">
+                <ArchiveButton variant="ghost" size="sm" @click="clearUpload">
+                  {{ t('detection.clearImage') }}
+                </ArchiveButton>
+                <span class="result-image-badge" v-if="det.hasCurrentResults">
+                  {{ det.currentResults.length }} {{ t('detection.patternsFound') || '个纹样' }}
+                </span>
               </div>
             </div>
 
-            <!-- 移动菜单 / 操作按钮 -->
-            <div :class="['home-nav-menu', { active: menuState }]">
-              <div class="home-nav-mobile">
-                <ul>
-                  <li v-for="(item, index) in menuItems" :key="index">
-                    <div @click="handleMobileNavClick(item.href)" class="home-nav-link cursor-pointer">{{ item.name }}</div>
-                  </li>
-                </ul>
+            <!-- 右侧：纹样列表（可滚动） -->
+            <div class="result-sidebar">
+              <div class="result-sidebar__header">
+                <span class="result-sidebar__title">{{ t('detection.patternsDetected') || '纹样识别结果' }}</span>
               </div>
 
-              <div class="home-nav-actions">
-                <template v-if="!isLoggedIn">
-                  <div class="btn-glass" @click="router.push('/login')">
-                    <div class="btn-glass-shadow"></div><div class="btn-glass-backdrop"></div>
-                    <div class="btn-glass-content"><span>登录</span></div>
+              <div class="result-list">
+                <div
+                  v-for="(result, idx) in det.currentResults"
+                  :key="idx"
+                  class="result-item"
+                  :class="{ 'result-item--active': activeResult === idx }"
+                  @click="activeResult = idx"
+                >
+                  <div class="result-item__row">
+                    <span class="result-item__index">{{ idx + 1 }}</span>
+                    <span class="result-item__label">{{ result.label }}</span>
+                    <span class="result-item__conf">{{ (result.confidence * 100).toFixed(1) }}%</span>
                   </div>
-                  <div class="btn-glass" @click="router.push('/register')">
-                    <div class="btn-glass-shadow"></div><div class="btn-glass-backdrop"></div>
-                    <div class="btn-glass-content"><span>注册</span></div>
+                  <div class="result-item__bar">
+                    <div class="result-item__bar-fill" :style="{ width: `${result.confidence * 100}%` }"></div>
                   </div>
-                </template>
-                <template v-else>
-                  <div class="home-user-info">
-                    <span 
-                      class="user-name" 
-                      @click="router.push('/profile')"
-                      role="button"
-                      tabindex="0"
-                      aria-label="查看个人资料"
-                    >
-                      {{ userName }}
-                    </span>
-                    <div class="btn-glass" @click="handleLogout">
-                      <div class="btn-glass-shadow"></div><div class="btn-glass-backdrop"></div>
-                      <div class="btn-glass-content"><span>退出登录</span></div>
-                    </div>
+                </div>
+              </div>
+
+              <!-- 选中纹样的详情面板 -->
+              <div v-if="det.hasCurrentResults && activeResult >= 0" class="result-detail">
+                <div class="result-detail__header">
+                  <span class="result-detail__label">{{ det.currentResults[activeResult]?.label }}</span>
+                  <span class="result-detail__conf">{{ (det.currentResults[activeResult]?.confidence * 100).toFixed(1) }}%</span>
+                </div>
+                <div class="result-detail__info" v-if="det.currentResults[activeResult]?.era || det.currentResults[activeResult]?.region">
+                  <div class="result-detail__row" v-if="det.currentResults[activeResult]?.era">
+                    <span class="result-detail__key">{{ t('detection.era') || '年代' }}</span>
+                    <span class="result-detail__val">{{ det.currentResults[activeResult].era }}</span>
                   </div>
-                </template>
+                  <div class="result-detail__row" v-if="det.currentResults[activeResult]?.region">
+                    <span class="result-detail__key">{{ t('detection.region') || '地域' }}</span>
+                    <span class="result-detail__val">{{ det.currentResults[activeResult].region }}</span>
+                  </div>
+                </div>
+                <div class="result-detail__remark">
+                  <ArchiveInput
+                    v-model="remarks[activeResult]"
+                    :placeholder="t('detection.remarkPlaceholder')"
+                  />
+                </div>
+                <ArchiveButton variant="primary" size="sm" @click="saveSingle(activeResult)">
+                  {{ t('detection.saveToArchive') }}
+                </ArchiveButton>
+              </div>
+
+              <!-- 全部保存 -->
+              <div class="result-sidebar__footer" v-if="det.hasCurrentResults">
+                <ArchiveButton variant="ghost" size="sm" fullWidth @click="clearUpload">
+                  {{ t('detection.clearImage') }}
+                </ArchiveButton>
               </div>
             </div>
           </div>
-        </div>
-      </nav>
-    </header>
+        </el-tab-pane>
 
-    <!-- 主要内容区域 -->
-    <main class="main-content">
-      <section class="content-section">
-        <div class="section-container">
-          <h1 class="page-title gradient-text">铜鼓纹样智能检测与分析</h1>
-          <el-tabs v-model="activeTab" class="custom-tabs">
-            <!-- Tab 1: 智能检测 -->
-            <el-tab-pane label="智能检测" name="detect">
-              <div class="detect-grid">
-                <!-- 左侧：上传与控制 -->
-                <div class="control-panel glass-card">
-                  <div class="panel-header">
-                    <h3 class="panel-title">上传待检测图片</h3>
+        <!-- Tab 2: Detection Records -->
+        <el-tab-pane :label="t('detection.detectionRecords')" name="records">
+          <div class="records-section">
+            <!-- 过滤器 -->
+            <div class="records-toolbar">
+              <div class="filter-pills">
+                <button
+                  :class="['pill', { active: det.patternFilter === '' }]"
+                  @click="det.setPatternFilter('')"
+                >{{ t('detection.all') }}</button>
+                <button
+                  v-for="pt in patternTypes"
+                  :key="pt.key"
+                  :class="['pill', { active: det.patternFilter === pt.key }]"
+                  @click="det.setPatternFilter(pt.key)"
+                >{{ pt.label }}</button>
+              </div>
+              <div class="records-count" v-if="det.hasRecords">
+                {{ det.total }} {{ t('detection.recordsTotal') || '条记录' }}
+              </div>
+            </div>
+
+            <!-- 空状态 -->
+            <div v-if="!det.hasRecords" class="empty-state">
+              <div class="empty-state__frame">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </div>
+              <p class="empty-state__text">{{ t('detection.noRecords') }}</p>
+              <p class="empty-state__hint">{{ t('detection.noRecordsHint') }}</p>
+            </div>
+
+            <!-- 记录列表 -->
+            <div v-else class="records-list">
+              <div
+                v-for="record in det.filteredRecords"
+                :key="record.id"
+                class="record-item"
+              >
+                <div class="record-item__img" v-if="record.annotated_image_url || record.original_image">
+                  <img :src="record.annotated_image_url || record.original_image" :alt="record.pattern_type" />
+                </div>
+                <div class="record-item__body">
+                  <div class="record-item__top">
+                    <span class="record-item__type">{{ record.pattern_type }}</span>
+                    <span class="record-item__conf">{{ (record.confidence * 100).toFixed(1) }}%</span>
                   </div>
-
-                  <!-- 上传区域 -->
-                  <el-upload
-                    class="upload-zone"
-                    drag
-                    action="#"
-                    :auto-upload="false"
-                    :show-file-list="false"
-                    :on-change="handleFileChange"
-                  >
-                    <div class="upload-content">
-                      <div class="upload-icon"></div>
-                      <p class="upload-text">将纹样图片拖到此处，或<em>点击上传</em></p>
-                      <p class="upload-hint">支持 JPG、PNG 格式，建议尺寸 ≥ 512px</p>
-                    </div>
-                  </el-upload>
-
-                  <!-- 检测按钮 -->
-                  <div class="button-wrapper">
-                    <button
-                      v-if="selectedFile"
-                      class="detect-button"
-                      :class="{ loading: isLoading }"
-                      @click="startDetection"
-                      :disabled="isLoading"
-                    >
-                      <span v-if="!isLoading">开始检测</span>
-                      <span v-else class="loading-text">
-                        <span class="spinner"></span>
-                        检测中...
-                      </span>
+                  <div class="record-item__meta">
+                    <span v-if="record.era_estimate">{{ record.era_estimate }}</span>
+                    <span v-if="record.region_type">{{ record.region_type }}</span>
+                  </div>
+                  <p v-if="record.remark" class="record-item__remark">{{ record.remark }}</p>
+                  <div class="record-item__bottom">
+                    <span class="record-item__date">{{ formatDate(record.created_at) }}</span>
+                    <button class="record-item__delete" @click="confirmDelete(record.id)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                      {{ t('detection.delete') }}
                     </button>
                   </div>
-
-                  <!-- 示例图片链接 -->
-                  <div class="sample-link" v-if="!selectedFile">
-                    <p class="link-text">没有铜鼓照片？</p>
-                    <router-link to="/samples" class="link-btn">
-                      前往示例图片库选择
-                      <span class="arrow">→</span>
-                    </router-link>
-                  </div>
-
-                  <!-- 识别结果 - 分页显示 -->
-                  <div class="results-section" v-if="detections.length > 0">
-                    <div class="results-header">
-                      <h3 class="results-title">
-                        识别结果分析
-                        <span class="result-count">(共 {{ detections.length }} 条)</span>
-                      </h3>
-                      
-                      <!-- 结果分页器 -->
-                      <div class="results-pagination" v-if="totalResultPages > 1">
-                        <button 
-                          class="page-btn" 
-                          :disabled="currentResultPage === 1"
-                          @click="currentResultPage--"
-                        >
-                          ‹
-                        </button>
-                        <span class="page-info">{{ currentResultPage }} / {{ totalResultPages }}</span>
-                        <button 
-                          class="page-btn"
-                          :disabled="currentResultPage === totalResultPages"
-                          @click="currentResultPage++"
-                        >
-                          ›
-                        </button>
-                      </div>
-                    </div>
-
-                    <!-- 分页后的结果列表 -->
-                    <transition-group name="list" tag="div" class="results-list">
-                      <div
-                        v-for="(item, index) in paginatedDetections"
-                        :key="'det-' + index"
-                        class="detection-result-card"
-                      >
-                        <div class="result-main">
-                          <div class="result-label">
-                            <el-tag type="success" effect="dark" size="large">{{ item.label }}</el-tag>
-                            <span class="confidence-badge" :style="{ width: Math.round(item.confidence * 100) + '%' }">
-                              {{ Math.round(item.confidence * 100) }}%
-                            </span>
-                          </div>
-                          
-                          <div class="result-details">
-                            <div class="detail-item">
-                              <span class="detail-label">年代推测</span>
-                              <span class="detail-value">{{ item.era }}</span>
-                            </div>
-                            <div class="detail-item">
-                              <span class="detail-label">地域类型</span>
-                              <span class="detail-value">{{ item.region }}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <!-- 保存操作 -->
-                        <div class="save-action" v-if="user">
-                          <input
-                            type="text"
-                            v-model="item.remark"
-                            placeholder="添加个人备注..."
-                            class="remark-input"
-                          />
-                          <button class="save-btn" @click="saveRecord(item)">保存</button>
-                        </div>
-                      </div>
-                    </transition-group>
-                  </div>
-                </div>
-
-                <!-- 右侧：图像预览 -->
-                <div class="preview-panel glass-card">
-                  <div class="panel-header">
-                    <h3 class="panel-title">可视化标记与关键特征</h3>
-                  </div>
-
-                  <div class="preview-container">
-                    <template v-if="annotatedImage">
-                      <el-image
-                        :src="annotatedImage"
-                        fit="contain"
-                        class="preview-image"
-                        :preview-src-list="[annotatedImage]"
-                      />
-                    </template>
-                    <template v-else-if="previewUrl">
-                      <el-image :src="previewUrl" fit="contain" class="preview-image" />
-                    </template>
-                    <div v-else class="empty-state">
-                      <p class="empty-text">请先在左侧上传铜鼓纹样图片</p>
-                    </div>
-                  </div>
                 </div>
               </div>
-            </el-tab-pane>
+            </div>
 
-            <!-- Tab 2: 归档记录 -->
-            <el-tab-pane label="识别归档" name="archive" :disabled="!user">
-              <div class="archive-panel glass-card">
-                <div class="panel-header">
-                  <h3 class="panel-title">识别记录归档</h3>
-                  
-                  <!-- 筛选器 -->
-                  <div class="filter-bar">
-                    <el-radio-group v-model="filterType" size="small" class="filter-group">
-                      <el-radio-button value="all">全部</el-radio-button>
-                      <el-radio-button value="sun">太阳纹</el-radio-button>
-                      <el-radio-button value="wa">蛙纹</el-radio-button>
-                      <el-radio-button value="lei">云雷纹</el-radio-button>
-                    </el-radio-group>
-                    
-                    <span class="record-stats">
-                      共 {{ filteredRecords.length }} 条记录
-                    </span>
-                  </div>
-                </div>
-
-                <!-- 记录网格 -->
-                <template v-if="filteredRecords.length > 0">
-                  <div class="records-grid">
-                    <transition-group name="grid" tag="div" class="grid-container">
-                      <div
-                        v-for="record in paginatedRecords"
-                        :key="record.id"
-                        class="record-card"
-                      >
-                        <div class="record-image-wrapper">
-                          <el-image
-                            :src="record.annotated_image_data"
-                            fit="cover"
-                            class="record-image"
-                            :alt="record.pattern_type"
-                          />
-                          <div class="record-overlay">
-                            <span class="overlay-label">{{ record.pattern_type }}</span>
-                          </div>
-                        </div>
-                        
-                        <div class="record-body">
-                          <div class="record-meta">
-                            <span class="record-type">{{ record.pattern_type }}</span>
-                            <span class="record-date">{{ formatDate(record.created_at) }}</span>
-                          </div>
-                          
-                          <p class="record-era">{{ record.era_estimate }}</p>
-                          
-                          <div class="record-remark">
-                            <span class="record-remark-text" v-if="record.remark">{{ record.remark }}</span>
-                          </div>
-                          
-                          <button
-                            class="delete-btn"
-                            @click="deleteRecord(record.id)"
-                            v-if="user"
-                          >
-                            删除
-                          </button>
-                        </div>
-                      </div>
-                    </transition-group>
-                  </div>
-
-                  <!-- 分页器 -->
-                  <div class="archive-pagination" v-if="totalPages > 1">
-                    <el-pagination
-                      :current-page="currentPage"
-                      :page-size="pageSize"
-                      :total="filteredRecords.length"
-                      layout="prev, pager, next"
-                      :background="true"
-                      class="custom-pagination"
-                      @update:current-page="(val) => currentPage = val"
-                    />
-                  </div>
-                </template>
-
-                <!-- 空状态 -->
-                <div v-else class="empty-archive">
-                  <p class="empty-text">暂无识别记录</p>
-                  <p class="empty-hint">完成检测后可在此查看历史记录</p>
-                  <button v-if="!user" class="login-prompt-btn" @click="router.push('/login')">
-                    登录后查看归档
-                  </button>
-                </div>
-              </div>
-            </el-tab-pane>
-          </el-tabs>
-        </div>
-      </section>
-    </main>
-    
-    <!-- 回到顶部按钮 -->
-    <BackToTop />
-    
-    <!-- 页脚 -->
-    <Footer />
+            <div v-if="det.totalPages > 1" class="records-pagination">
+              <el-pagination
+                :current-page="det.currentPage"
+                :page-size="det.pageSize"
+                :total="det.total"
+                layout="prev, pager, next"
+                @current-change="det.setPage"
+              />
+            </div>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+    </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import api from '../utils/axios'
+import { useI18n } from 'vue-i18n'
+import { useDetectionStore } from '@/stores/detection'
+import { useAuthStore } from '@/stores/auth'
+import { ElMessageBox, ElMessage } from 'element-plus'
+import ArchiveButton from '@/components/ArchiveButton.vue'
+import ArchiveInput from '@/components/ArchiveInput.vue'
+import SectionHeader from '@/components/SectionHeader.vue'
 
-import '@/styles/HomePage.css'
-import BackToTop from '@/components/BackToTop.vue'
-import Footer from '@/components/Footer.vue'
-
+const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
-
-const menuState = ref(false)
-const scrolled = ref(false)
-const isLoggedIn = ref(false)
-const userName = ref('')
-const user = ref(null)
-
-const menuItems = [
-  { name: '前言', href: '/preface' },
-  { name: '起源与发展', href: '/origin' },
-  { name: '制作工艺', href: '/craft' },
-  { name: '铜鼓类型', href: '/types' },
-  { name: '艺术特色', href: '/art' },
-  { name: '文化功能', href: '/culture' },
-  { name: '现状', href: '/status' },
-  { name: '检测', href: '/detection' },
-]
+const det = useDetectionStore()
+const auth = useAuthStore()
 
 const activeTab = ref('detect')
-
-const isLoading = ref(false)
-const selectedFile = ref(null)
-const previewUrl = ref('')
-const annotatedImage = ref('')
-const detections = ref([])
-
-const currentResultPage = ref(1)
-const resultPageSize = ref(3)
-
-const sampleImages = ref([
-  {
-    name: '太阳纹样',
-    thumb: new URL('@/assets/tonggu06.png', import.meta.url).href,
-    full: new URL('@/assets/tonggu06.png', import.meta.url).href
-  },
-  {
-    name: '蛙纹样',
-    thumb: new URL('@/assets/tonggu07.png', import.meta.url).href,
-    full: new URL('@/assets/tonggu07.png', import.meta.url).href
-  },
-  {
-    name: '云雷纹',
-    thumb: new URL('@/assets/tonggu04.png', import.meta.url).href,
-    full: new URL('@/assets/tonggu04.png', import.meta.url).href
-  }
+const activeResult = ref(0)
+const selectedFile = ref<File | null>(null)
+const isDragOver = ref(false)
+const remarks = ref<string[]>([])
+const patternTypes = computed(() => [
+  { key: '太阳纹', label: t('detection.sunPattern') },
+  { key: '蛙纹', label: t('detection.frogPattern') },
+  { key: '云雷纹', label: t('detection.cloudThunderPattern') },
 ])
+const fileInput = ref<HTMLInputElement | null>(null)
 
-const historyRecords = ref([])
-const filterType = ref('all')
-const currentPage = ref(1)
-const pageSize = ref(9)
+let authPromptShown = false
 
-const totalResultPages = computed(() => {
-  return Math.ceil(detections.value.length / resultPageSize.value)
-})
-
-const paginatedDetections = computed(() => {
-  const start = (currentResultPage.value - 1) * resultPageSize.value
-  const end = start + resultPageSize.value
-  return detections.value.slice(start, end)
-})
-
-const filteredRecords = computed(() => {
-  if (filterType.value === 'all') return historyRecords.value
-  const typeMap = { sun: '太阳纹', wa: '蛙纹', lei: '云雷纹' }
-  return historyRecords.value.filter(r => r.pattern_type === typeMap[filterType.value])
-})
-
-const totalPages = computed(() => {
-  return Math.ceil(filteredRecords.value.length / pageSize.value)
-})
-
-const paginatedRecords = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return filteredRecords.value.slice(start, end)
-})
-
-const toggleMenu = () => {
-  menuState.value = !menuState.value
-}
-
-const handleMobileNavClick = (href) => {
-  router.push(href)
-  menuState.value = false
-}
-
-const handleScroll = () => {
-  scrolled.value = window.scrollY > window.innerHeight * 0.05
-}
-
-const handleLogout = () => {
-  localStorage.removeItem('user')
-  localStorage.removeItem('token')
-  isLoggedIn.value = false
-  userName.value = ''
-  user.value = null
-  ElMessage.success('退出登录成功')
-  router.push('/')
-}
-
-const handleFileChange = (file) => {
-  selectedFile.value = file.raw
-  previewUrl.value = URL.createObjectURL(file.raw)
-  annotatedImage.value = ''
-  detections.value = []
-  currentResultPage.value = 1
-}
-
-const downloadSample = async (sample) => {
-  try {
-    const response = await fetch(sample.full)
-    const blob = await response.blob()
-    const file = new File([blob], `${sample.name}.png`, { type: 'image/png' })
-    
-    selectedFile.value = file
-    previewUrl.value = URL.createObjectURL(file)
-    annotatedImage.value = ''
-    detections.value = []
-    currentResultPage.value = 1
-    
-    ElMessage.success(`已加载示例图片：${sample.name}`)
-  } catch (error) {
-    ElMessage.error('加载示例图片失败')
-  }
-}
-
-const loadSampleImage = async (sample) => {
-  try {
-    const response = await fetch(sample.image)
-    const blob = await response.blob()
-    const file = new File([blob], `${sample.name}.png`, { type: 'image/png' })
-    
-    selectedFile.value = file
-    previewUrl.value = URL.createObjectURL(file)
-    annotatedImage.value = ''
-    detections.value = []
-    currentResultPage.value = 1
-    
-    ElMessage.success(`已加载示例图片：${sample.name}，可以直接开始检测`)
-  } catch (error) {
-    ElMessage.error('加载示例图片失败')
-  }
-}
-
-const startDetection = async () => {
-  if (!selectedFile.value) return
-
-  const formData = new FormData()
-  formData.append('image', selectedFile.value)
-
-  try {
-    isLoading.value = true
-    const response = await api.post('/api/detection/detect/', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-
-    if (response.status === 200) {
-      detections.value = response.data.detections.map(d => ({ ...d, remark: '' }))
-      annotatedImage.value = response.data.image_data
-      currentResultPage.value = 1
-      ElMessage.success('检测并分析完成')
-      activeTab.value = 'detect'
+function checkAuth() {
+  if (auth.isLoggedIn || authPromptShown) return
+  authPromptShown = true
+  ElMessageBox.confirm(
+    t('detection.detectionLoginPrompt'),
+    t('detection.detectionRequiresLogin'),
+    {
+      confirmButtonText: t('detection.loginNow'),
+      cancelButtonText: t('common.cancel'),
+      type: 'warning',
     }
-  } catch (error) {
-    ElMessage.error('检测失败：' + (error.response?.data?.message || error.message))
-  } finally {
-    isLoading.value = false
-  }
-}
-
-const saveRecord = async (item) => {
-  try {
-    const formData = new FormData()
-    formData.append('annotated_image_data', annotatedImage.value)
-    formData.append('pattern_type', item.label)
-    formData.append('era_estimate', item.era)
-    formData.append('region_type', item.region)
-    formData.append('confidence', item.confidence)
-    formData.append('remark', item.remark)
-
-    const response = await api.post('/api/detection/save-record/', formData)
-
-    if (response.status === 201) {
-      ElMessage.success('记录已存入档案')
-      fetchHistory()
-    }
-  } catch (error) {
-    ElMessage.error('保存失败：' + (error.response?.data?.detail || error.message))
-  }
-}
-
-const fetchHistory = async () => {
-  try {
-    const response = await api.get('/api/detection/my-records/')
-    historyRecords.value = response.data
-  } catch (error) {
-    console.error('无法获取历史记录', error)
-  }
-}
-
-const deleteRecord = async (id) => {
-  try {
-    const confirmed = window.confirm('确定要删除这条识别记录吗？此操作无法撤销。')
-    if (!confirmed) return
-
-    const response = await api.delete(`/api/detection/delete-record/${id}/`)
-
-    if (response.status === 200 || response.status === 204) {
-      ElMessage.success('记录已删除')
-      fetchHistory()
-    }
-  } catch (error) {
-    ElMessage.error('删除失败：' + (error.response?.data?.detail || error.message))
-  }
-}
-
-const formatDate = (dateStr) => {
-  return new Date(dateStr).toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
+  ).then(() => {
+    router.push({ name: 'login', query: { redirect: route.fullPath } })
+  }).catch(() => {
+    router.back()
   })
 }
 
-watch(filterType, () => {
-  currentPage.value = 1
-})
+const MAX_FILE_SIZE = 50 * 1024 * 1024
+
+function revokeCurrentImage() {
+  if (det.currentImage?.startsWith('blob:')) {
+    URL.revokeObjectURL(det.currentImage)
+  }
+}
+
+function triggerFileInput() {
+  fileInput.value?.click()
+}
+
+function handleFileSelect(e: Event) {
+  const input = e.target as HTMLInputElement
+  if (input.files?.[0]) {
+    const file = input.files[0]
+    if (file.size > MAX_FILE_SIZE) {
+      ElMessage.warning(t('detection.fileSizeExceed') || '文件大小不能超过50MB')
+      return
+    }
+    revokeCurrentImage()
+    selectedFile.value = file
+    det.currentImage = URL.createObjectURL(file)
+  }
+}
+
+function handleDrop(e: DragEvent) {
+  isDragOver.value = false
+  const file = e.dataTransfer?.files[0]
+  if (file && file.type.startsWith('image/')) {
+    if (file.size > MAX_FILE_SIZE) {
+      ElMessage.warning(t('detection.fileSizeExceed') || '文件大小不能超过50MB')
+      return
+    }
+    revokeCurrentImage()
+    selectedFile.value = file
+    det.currentImage = URL.createObjectURL(file)
+  }
+}
+
+function clearUpload() {
+  revokeCurrentImage()
+  selectedFile.value = null
+  det.clearCurrent()
+  remarks.value = []
+}
+
+async function runDetection() {
+  if (!selectedFile.value) return
+  if (!auth.isLoggedIn) {
+    try {
+      await ElMessageBox.confirm(
+        t('detection.detectionLoginPrompt'),
+        t('detection.detectionRequiresLogin'),
+        {
+          confirmButtonText: t('detection.loginNow'),
+          cancelButtonText: t('common.cancel'),
+          type: 'warning',
+        }
+      )
+      router.push({ name: 'login', query: { redirect: route.fullPath } })
+    } catch {}
+    return
+  }
+  try {
+    await det.detectImage(selectedFile.value)
+    remarks.value = det.currentResults.map(() => '')
+  } catch {}
+}
+
+async function saveSingle(idx: number) {
+  const r = det.currentResults[idx]
+  try {
+    await det.saveRecord({
+      pattern_type: r.label,
+      era_estimate: r.era,
+      region_type: r.region,
+      confidence: r.confidence,
+      remark: remarks.value[idx] || undefined,
+      annotated_image_data: det.currentImage.startsWith('data:' ) ? det.currentImage : undefined,
+    })
+  } catch { ElMessage.error(t('errors.saveFailed')) }
+}
+
+async function confirmDelete(id: number) {
+  try {
+    await ElMessageBox.confirm(t('detection.confirmDeleteRecord'), t('detection.confirmDelete'), {
+      confirmButtonText: t('detection.delete'),
+      cancelButtonText: t('common.cancel'),
+      type: 'warning',
+    })
+    await det.deleteRecord(id)
+    ElMessage.success(t('errors.deleteSuccess'))
+  } catch {}
+}
+
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll, { passive: true })
-  handleScroll()
-
-  const userData = localStorage.getItem('user')
-  if (userData) {
-    user.value = JSON.parse(userData)
-    isLoggedIn.value = true
-    userName.value = user.value.username || '用户'
-    fetchHistory()
+  auth.initFromStorage()
+  if (auth.isLoggedIn) {
+    det.fetchRecords()
+  } else {
+    checkAuth()
   }
 
   if (route.query.useSample === 'true') {
     const sampleData = sessionStorage.getItem('selectedSample')
     if (sampleData) {
-      const sample = JSON.parse(sampleData)
-      loadSampleImage(sample)
+      try {
+        const sample = JSON.parse(sampleData)
+        if (sample.image) {
+          fetch(sample.image)
+            .then(r => r.blob())
+            .then(blob => {
+              const file = new File([blob], `${sample.name || 'sample'}.png`, { type: 'image/png' })
+              revokeCurrentImage()
+              selectedFile.value = file
+              det.currentImage = URL.createObjectURL(file)
+            })
+        }
+      } catch {}
       sessionStorage.removeItem('selectedSample')
     }
   }
 })
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
+  revokeCurrentImage()
+})
+
+watch(activeTab, (tab) => {
+  if (tab === 'records' && auth.isLoggedIn) {
+    det.fetchRecords(1)
+  }
 })
 </script>
 
 <style scoped>
+.detection-page { min-height: 100vh; }
 
-.detection-page {
-  position: relative;
-  min-height: 100vh;
-  background: #000000;
-  overflow-x: hidden;
+.detection-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6);
 }
 
-.bg-image {
-  position: fixed;
+/* ===== Standalone Upload (no image yet) ===== */
+.upload-standalone {
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.upload-zone {
+  position: relative;
+  border: 2px dashed var(--border-gold);
+  border-radius: var(--radius-md);
+  width: 100%;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: rgba(201, 162, 39, 0.015);
+  transition: all var(--duration-normal);
+}
+
+.upload-zone:hover { border-color: var(--accent-gold); background: rgba(201, 162, 39, 0.03); }
+.upload-zone--active { border-color: var(--accent-gold); background: rgba(201, 162, 39, 0.05); }
+
+.upload-zone__deco {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--space-4);
+}
+
+.upload-zone__corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--accent-gold);
+  opacity: 0.4;
+}
+.upload-zone__corner--tl { top: 0; left: 0; border-top: 2px solid; border-left: 2px solid; }
+.upload-zone__corner--tr { top: 0; right: 0; border-top: 2px solid; border-right: 2px solid; }
+.upload-zone__corner--bl { bottom: 0; left: 0; border-bottom: 2px solid; border-left: 2px solid; }
+.upload-zone__corner--br { bottom: 0; right: 0; border-bottom: 2px solid; border-right: 2px solid; }
+
+.upload-zone__icon-wrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--accent-gold);
+  opacity: 0.6;
+}
+
+.upload-zone__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6);
+}
+
+.upload-zone__text { font-size: var(--text-base); color: var(--text-secondary); }
+.upload-zone__hint { font-size: var(--text-xs); color: var(--text-muted); }
+
+.upload-actions-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.sample-link { text-align: center; }
+.sample-link__btn { font-size: var(--text-sm); color: var(--accent-gold); text-decoration: none; transition: color var(--duration-fast); }
+.sample-link__btn:hover { color: var(--accent-gold-light); }
+.sample-link__arrow { display: inline-block; transition: transform var(--duration-fast); }
+.sample-link__btn:hover .sample-link__arrow { transform: translateX(4px); }
+
+/* ===== Preview State (image selected, not yet detected) ===== */
+.preview-state {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.preview-frame {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-image {
+  width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+  display: block;
+  border-radius: var(--radius-sm);
+}
+
+.preview-actions {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ===== Detecting State ===== */
+.detecting-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-20) var(--space-6);
+  gap: var(--space-4);
+}
+
+.detecting-orb { position: relative; width: 56px; height: 56px; }
+
+.detecting-orb__ring {
+  position: absolute;
   inset: 0;
-  background-image: url('@/assets/tonggu07.png');
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-  z-index: 0;
+  border: 2px solid transparent;
+  border-top-color: var(--accent-gold);
+  border-radius: 50%;
+  animation: orb-spin 1s linear infinite;
+}
+
+.detecting-orb__ring--outer {
+  inset: -6px;
+  border-top-color: var(--accent-copper);
+  animation-duration: 1.6s;
+  animation-direction: reverse;
   opacity: 0.5;
 }
 
-.main-content {
-  position: relative;
-  z-index: 10;
-  flex: 1;
-  width: 100%;
-  padding: 8rem 0 4rem;
-  overflow-y: auto;
+.detecting-orb__core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  transform: translate(-50%, -50%);
+  background: var(--accent-gold);
+  border-radius: 50%;
+  animation: orb-pulse 1.5s ease-in-out infinite;
 }
 
-.content-section {
-  padding: 2rem 0;
-}
+@keyframes orb-spin { to { transform: rotate(360deg); } }
+@keyframes orb-pulse { 0%,100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); } }
 
-.section-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
+.detecting-state__text { color: var(--text-secondary); }
+.detecting-state__sub { color: var(--text-muted); font-size: var(--text-xs); font-family: var(--font-mono); letter-spacing: 1px; }
 
-.page-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 3rem;
-  color: white;
-  background: linear-gradient(90deg, #d4af37, #f4e4ba, #d4af37);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.custom-tabs {
-  --el-color-primary: #d4af37;
-}
-
-.custom-tabs :deep(.el-tabs__header) {
-  margin-bottom: 2rem;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-}
-
-.custom-tabs :deep(.el-tabs__nav-wrap::after) {
-  display: none;
-}
-
-.custom-tabs :deep(.el-tabs__item) {
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: 500;
-  font-size: 1rem;
-  padding: 12px 24px;
-  transition: all 0.3s ease;
-  border-bottom: 2px solid transparent;
-}
-
-.custom-tabs :deep(.el-tabs__item:hover) {
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.custom-tabs :deep(.el-tabs__item.is-active) {
-  color: #d4af37;
-  border-bottom-color: #d4af37;
-}
-
-.custom-tabs :deep(.el-tabs__active-bar) {
-  display: none;
-}
-
-.custom-tabs :deep(.el-tabs__content) {
-  padding: 0;
-}
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  transition: all 0.3s ease;
-}
-
-.glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-/* Detect Grid Layout */
-.detect-grid {
+/* ===== Result Workspace: Image + Sidebar ===== */
+.result-workspace {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-8);
+  grid-template-columns: 1fr 360px;
+  gap: var(--space-6);
   align-items: start;
+  min-height: 500px;
 }
 
-@media (min-width: 1024px) {
-  .detect-grid {
-    grid-template-columns: 420px 1fr;
-    align-items: start;
-  }
+/* Image Panel */
+.result-image-panel {
+  position: relative;
 }
 
-/* Panel Header */
-.panel-header {
-  padding: var(--space-6);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.panel-title {
-  font-size: var(--text-lg);
-  font-weight: var(--font-semibold);
-  color: var(--color-accent-gold-light);
+.result-image-frame {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-/* Control Panel */
-.control-panel {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Upload Zone */
-.upload-zone {
-  padding: var(--space-6);
-  margin: var(--space-6) 0;
-}
-
-.upload-zone :deep(.el-upload-dragger) {
-  background: transparent;
-  border: 2px dashed rgba(212, 175, 55, 0.3);
-  border-radius: var(--radius-lg);
-  padding: var(--space-10) var(--space-6);
-  transition: all var(--transition-base);
-  display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
-.upload-zone :deep(.el-upload-dragger:hover) {
-  border-color: rgba(212, 175, 55, 0.6);
-  background: rgba(212, 175, 55, 0.05);
-}
-
-.upload-content {
-  text-align: center;
+.result-image {
   width: 100%;
+  max-height: 560px;
+  object-fit: contain;
+  display: block;
+  border-radius: var(--radius-sm);
+}
+
+.result-image-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-3);
+}
+
+.result-image-badge {
+  font-size: var(--text-xs);
+  color: var(--accent-gold);
+  font-family: var(--font-mono);
+  padding: 2px 8px;
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-sm);
+}
+
+/* Sidebar */
+.result-sidebar {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.upload-icon {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto var(--space-4);
-  border: 3px dashed rgba(212, 175, 55, 0.4);
-  border-radius: var(--radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.upload-icon::before {
-  content: '+';
-  font-size: 2.5rem;
-  color: rgba(212, 175, 55, 0.6);
-  font-weight: 300;
-}
-
-.upload-text {
-  color: var(--color-text-secondary);
-  font-size: var(--text-base);
-  margin-bottom: var(--space-2);
-}
-
-.upload-text em {
-  color: var(--color-accent-gold);
-  font-style: normal;
-  font-weight: var(--font-semibold);
-}
-
-.upload-hint {
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-  margin-top: var(--space-2);
-}
-
-/* Sample Link - 替代示例图片 */
-.sample-link {
-  margin-top: -1.5rem;
-  margin-bottom: 1.5rem;
-  padding: 1.75rem 2rem;
-  background: rgba(212, 175, 55, 0.08);
-  border: 1px solid rgba(212, 175, 55, 0.25);
-  border-radius: 16px;
-  text-align: center;
-  max-width: 360px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.link-text {
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.75);
-  margin-bottom: 1.25rem;
-  font-weight: 500;
-}
-
-.link-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 32px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #d4af37;
-  text-decoration: none;
-  background: rgba(212, 175, 55, 0.12);
-  border: 1px solid rgba(212, 175, 55, 0.35);
-  border-radius: 10px;
-  transition: all 0.3s ease;
-}
-
-.link-btn:hover {
-  background: rgba(212, 175, 55, 0.2);
-  border-color: rgba(212, 175, 55, 0.6);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.25);
-}
-
-.arrow {
-  transition: transform 0.3s ease;
-  font-size: 1.1rem;
-}
-
-.link-btn:hover .arrow {
-  transform: translateX(4px);
-}
-
-/* Button Wrapper - 居中 */
-.button-wrapper {
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
-  margin-bottom: 1.5rem;
-}
-
-/* Detect Button */
-.detect-button {
-  width: auto;
-  padding: 12px 32px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #000;
-  background: linear-gradient(90deg, #d4af37, #f4e4ba);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
+  max-height: 680px;
   overflow: hidden;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.detect-button:hover:not(:disabled):not(.loading) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
+.result-sidebar__header {
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
-.detect-button:active:not(:disabled) {
-  transform: translateY(0);
+.result-sidebar__title {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--accent-gold);
+  letter-spacing: 0.5px;
 }
 
-.detect-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+/* Result list - scrollable */
+.result-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-2) 0;
 }
 
-.detect-button.loading {
-  pointer-events: none;
+.result-list::-webkit-scrollbar { width: 4px; }
+.result-list::-webkit-scrollbar-track { background: transparent; }
+.result-list::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 2px; }
+
+.result-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  cursor: pointer;
+  transition: background var(--duration-fast);
+  border-left: 2px solid transparent;
 }
 
-.loading-text {
+.result-item:hover { background: var(--bg-hover); }
+.result-item--active {
+  background: rgba(201, 162, 39, 0.06);
+  border-left-color: var(--accent-gold);
+}
+
+.result-item__row {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: var(--space-3);
 }
 
-.spinner {
+.result-item__index {
   width: 20px;
   height: 20px;
-  border: 2px solid rgba(0, 0, 0, 0.2);
-  border-top-color: #000;
+  border: 1px solid var(--border-subtle);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Results Section */
-.results-section {
-  margin-top: 2.5rem;
-  padding: 2rem;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: var(--radius-lg);
-  max-height: 600px;
-  overflow-y: auto;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.results-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-6);
-  flex-wrap: wrap;
-  gap: var(--space-4);
-}
-
-.results-title {
-  font-size: var(--text-lg);
-  font-weight: var(--font-semibold);
-  color: var(--color-accent-gold-light);
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex-wrap: wrap;
-}
-
-.result-count {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  font-weight: var(--font-normal);
-}
-
-/* Results Pagination (Mini) - 全透明样式 */
-.results-pagination {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.page-btn {
-  width: 32px;
-  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: var(--radius-md);
-  color: rgba(255, 255, 255, 0.9);
-  font-size: var(--text-lg);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  flex-shrink: 0;
 }
 
-.page-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border-color: rgba(212, 175, 55, 0.4);
-  color: #d4af37;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), 0 0 12px rgba(212, 175, 55, 0.1);
-  transform: translateY(-1px);
+.result-item--active .result-item__index {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
 }
 
-.page-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-  background: transparent !important;
-}
-
-.page-info {
+.result-item__label {
+  flex: 1;
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.7);
-  min-width: 60px;
-  text-align: center;
   font-weight: 500;
+  color: var(--text-primary);
 }
 
-/* Results List */
-.results-list {
+.result-item__conf {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.result-item__bar {
+  height: 2px;
+  background: var(--bg-hover);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-left: 32px;
+}
+
+.result-item__bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-copper), var(--accent-gold));
+  border-radius: 1px;
+  transition: width 0.6s var(--ease-out);
+}
+
+/* Detail panel for selected result */
+.result-detail {
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-3);
+  background: rgba(201, 162, 39, 0.02);
 }
 
-.detection-result-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-  transition: all var(--transition-fast);
-}
-
-.detection-result-card:hover {
-  border-color: var(--color-border-hover);
-  background: var(--color-surface-hover);
-  transform: translateX(4px);
-}
-
-.result-main {
-  margin-bottom: var(--space-4);
-}
-
-.result-label {
+.result-detail__header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-4);
-  gap: var(--space-4);
-}
-
-.confidence-badge {
-  height: 8px;
-  background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981);
-  border-radius: var(--radius-full);
-  position: relative;
-  min-width: 80px;
-  font-size: var(--text-xs);
-  font-weight: var(--font-semibold);
-  color: white;
-  text-align: center;
-  line-height: 8px;
-  padding: 0 var(--space-2);
-}
-
-.result-details {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  align-items: baseline;
   gap: var(--space-3);
 }
 
-.detail-item {
+.result-detail__label {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--accent-gold);
+}
+
+.result-detail__conf {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.result-detail__info {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
 }
 
-.detail-label {
+.result-detail__row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.result-detail__key {
   font-size: var(--text-xs);
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.detail-value {
-  font-size: var(--text-sm);
-  color: var(--color-text-primary);
-  font-weight: var(--font-medium);
-}
-
-/* Save Action */
-.save-action {
-  display: flex;
-  gap: var(--space-3);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--color-border);
-}
-
-.remark-input {
-  flex: 1;
-  padding: var(--space-2) var(--space-3);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  color: var(--color-text-primary);
-  font-size: var(--text-sm);
-  transition: all var(--transition-fast);
-}
-
-.remark-input:focus {
-  outline: none;
-  border-color: var(--color-accent-gold);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.remark-input::placeholder {
-  color: var(--color-text-muted);
-}
-
-.save-btn {
-  padding: var(--space-2) var(--space-4);
-  background: rgba(212, 175, 55, 0.15);
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  border-radius: var(--radius-md);
-  color: var(--color-accent-gold);
-  font-size: var(--text-sm);
-  font-weight: var(--font-semibold);
-  cursor: pointer;
-  transition: all var(--transition-fast);
+  color: var(--text-muted);
   white-space: nowrap;
+  min-width: 36px;
 }
 
-.save-btn:hover {
-  background: rgba(212, 175, 55, 0.25);
-  border-color: rgba(212, 175, 55, 0.5);
-  transform: translateY(-1px);
+.result-detail__val {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
 }
 
-/* Preview Panel */
-.preview-panel {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-height: 700px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+.result-sidebar__footer {
+  padding: var(--space-3) var(--space-5);
+  border-top: 1px solid var(--border-subtle);
 }
 
-.preview-container {
-  flex: 1;
-  padding: var(--space-6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-lg);
-  margin: var(--space-6);
-  overflow: hidden;
-}
+/* ===== Records Section ===== */
+.records-section { padding-top: var(--space-4); }
 
-.preview-image {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  border-radius: var(--radius-md);
-  background: transparent;
-}
-
-.preview-image :deep(img) {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  background: transparent;
-}
-
-.preview-image :deep(.el-image__inner) {
-  background: transparent;
-}
-
-.preview-image :deep(.el-image__placeholder),
-.preview-image :deep(.el-image__error) {
-  background: transparent;
-}
-
-.preview-container :deep(.el-image) {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.preview-container :deep(.el-image__inner) {
-  position: relative !important;
-  width: auto !important;
-  height: auto !important;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  background: transparent !important;
-}
-
-.preview-container :deep(.el-image__placeholder),
-.preview-container :deep(.el-image__error) {
-  background: transparent !important;
-}
-
-.empty-state {
-  text-align: center;
-  padding: var(--space-12) var(--space-6);
-}
-
-.empty-text {
-  color: var(--color-text-muted);
-  font-size: var(--text-base);
-}
-
-/* Archive Panel */
-.archive-panel {
-  padding: var(--space-6);
-}
-
-.filter-bar {
+.records-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-  padding: var(--space-4) 0;
-  border-bottom: 1px solid var(--color-border);
   margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+  gap: var(--space-3);
 }
 
-.filter-group {
-  background: transparent;
-}
+.records-count { font-size: var(--text-sm); color: var(--text-muted); font-family: var(--font-mono); }
 
-.filter-group :deep(.el-radio-button__inner) {
-  background: var(--color-surface);
-  border-color: var(--color-border);
-  color: var(--color-text-secondary);
-  padding: var(--space-2) var(--space-4);
-}
+.filter-pills { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 
-.filter-group :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(244, 228, 186, 0.2));
-  border-color: rgba(212, 175, 55, 0.5);
-  color: var(--color-accent-gold-light);
-}
-
-.record-stats {
+.pill {
+  padding: var(--space-1) var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
   font-size: var(--text-sm);
-  color: var(--color-text-muted);
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--duration-fast);
 }
+.pill:hover { border-color: var(--accent-gold); color: var(--text-primary); }
+.pill.active { border-color: var(--accent-gold); color: var(--accent-gold); background: rgba(201, 162, 39, 0.08); }
 
-/* Records Grid */
-.records-grid {
-  margin-bottom: var(--space-8);
-}
-
-.grid-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--space-6);
-}
-
-@media (max-width: 768px) {
-  .grid-container {
-    grid-template-columns: 1fr;
-  }
-}
-
-.record-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  transition: all var(--transition-base);
-}
-
-.record-card:hover {
-  border-color: var(--color-border-hover);
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-}
-
-.record-image-wrapper {
-  position: relative;
-  overflow: hidden;
-}
-
-.record-image {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  transition: transform var(--transition-slow);
-}
-
-.record-card:hover .record-image {
-  transform: scale(1.05);
-}
-
-.record-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
-  display: flex;
-  align-items: flex-end;
-  padding: var(--space-4);
-  opacity: 0;
-  transition: opacity var(--transition-base);
-}
-
-.record-card:hover .record-overlay {
-  opacity: 1;
-}
-
-.overlay-label {
-  color: white;
-  font-weight: var(--font-semibold);
-  font-size: var(--text-base);
-}
-
-.record-body {
-  padding: var(--space-5);
+/* Empty state */
+.empty-state {
   display: flex;
   flex-direction: column;
-  min-height: 180px;
-}
-
-.record-meta {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-3);
-}
-
-.record-type {
-  font-weight: var(--font-semibold);
-  color: var(--color-accent-gold-light);
-  font-size: var(--text-base);
-}
-
-.record-date {
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-}
-
-.record-era {
-  font-size: var(--text-sm);
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-3);
-}
-
-.record-remark {
-  font-size: var(--text-sm);
-  color: #d1d5db;
-  background: rgba(255, 255, 255, 0.05);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--space-4);
-  display: flex;
-  align-items: center;
-  height: 32px;
-  overflow: hidden;
-  position: relative;
-  box-sizing: border-box;
-}
-
-.record-remark-text {
-  white-space: nowrap;
-  overflow-x: auto;
-  flex: 1;
-  color: #d1d5db;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.record-remark-text::-webkit-scrollbar {
-  display: none;
-}
-
-.delete-btn {
-  width: 100%;
-  padding: var(--space-2) var(--space-4);
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: var(--radius-md);
-  color: #ef4444;
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  margin-top: auto;
-}
-
-.delete-btn:hover {
-  background: rgba(239, 68, 68, 0.2);
-  border-color: rgba(239, 68, 68, 0.4);
-}
-
-/* Archive Pagination - 全透明样式 */
-.archive-pagination {
-  display: flex;
-  justify-content: center;
-  padding: var(--space-6) 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.custom-pagination :deep(.el-pagination) {
-  --el-pagination-button-bg-color: transparent;
-  --el-pagination-hover-color: #d4af37;
-  background: transparent;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-.custom-pagination :deep(.btn-next),
-.custom-pagination :deep(.btn-prev) {
-  background: transparent !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  color: rgba(255, 255, 255, 0.9);
-  transition: all 0.3s ease;
-}
-
-.custom-pagination :deep(.btn-next:hover),
-.custom-pagination :deep(.btn-prev:hover) {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border-color: rgba(212, 175, 55, 0.4) !important;
-  color: #d4af37;
-}
-
-.custom-pagination :deep(.el-pager li) {
-  background: transparent !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0 4px;
-  transition: all 0.3s ease;
-}
-
-.custom-pagination :deep(.el-pager li:hover) {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border-color: rgba(212, 175, 55, 0.4);
-  color: #d4af37;
-}
-
-.custom-pagination :deep(.is-active) {
-  background: rgba(212, 175, 55, 0.2) !important;
-  border-color: rgba(212, 175, 55, 0.5) !important;
-  color: #d4af37 !important;
-  font-weight: 600;
-}
-
-/* Empty Archive State */
-.empty-archive {
-  text-align: center;
   padding: var(--space-16) var(--space-6);
+  text-align: center;
 }
 
-.empty-archive .empty-text {
-  font-size: var(--text-xl);
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-3);
+.empty-state__frame {
+  width: 80px;
+  height: 80px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  margin-bottom: var(--space-4);
+  opacity: 0.5;
 }
 
-.empty-archive .empty-hint {
-  color: var(--color-text-muted);
-  margin-bottom: var(--space-8);
+.empty-state__text { color: var(--text-secondary); margin-bottom: var(--space-1); }
+.empty-state__hint { color: var(--text-muted); font-size: var(--text-sm); }
+
+/* Records list */
+.records-list { display: flex; flex-direction: column; gap: var(--space-3); }
+
+.record-item {
+  display: flex;
+  gap: var(--space-4);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+  height: 140px;
+  overflow: hidden;
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
 }
 
-.login-prompt-btn {
-  padding: var(--space-3) var(--space-8);
-  background: var(--gradient-gold);
-  color: #000;
-  font-weight: var(--font-semibold);
+.record-item:hover { border-color: rgba(201, 162, 39, 0.35); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+
+.record-item__img {
+  flex: 0 0 140px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--bg-elevated);
+}
+
+.record-item__img img { width: 100%; height: 100%; object-fit: cover; }
+
+.record-item__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  overflow: hidden;
+}
+
+.record-item__top { display: flex; align-items: center; gap: var(--space-3); }
+.record-item__type { font-family: var(--font-display); font-size: var(--text-base); font-weight: 600; color: var(--accent-gold); }
+.record-item__conf { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--text-secondary); }
+
+.record-item__meta { display: flex; gap: var(--space-3); font-size: var(--text-sm); color: var(--text-muted); }
+.record-item__meta span + span::before { content: '·'; margin-right: var(--space-3); }
+
+.record-item__remark {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.record-item__bottom { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
+.record-item__date { font-size: var(--text-xs); color: var(--text-muted); font-family: var(--font-mono); }
+
+.record-item__delete {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: none;
   border: none;
-  border-radius: var(--radius-full);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
   cursor: pointer;
-  transition: all var(--transition-base);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: color var(--duration-fast), background var(--duration-fast);
+}
+.record-item__delete:hover { color: #e74c3c; background: rgba(231, 76, 60, 0.08); }
+
+.records-pagination { display: flex; justify-content: center; padding-top: var(--space-8); }
+
+.records-pagination :deep(.el-pagination) {
+  --el-pagination-bg-color: transparent;
+  --el-pagination-button-bg-color: var(--bg-surface);
+  --el-pagination-hover-color: var(--accent-gold);
+  --el-pagination-text-color: var(--text-muted);
+  --el-pagination-button-color: var(--text-secondary);
 }
 
-.login-prompt-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--glow-gold);
+.records-pagination :deep(.el-pager li) {
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  border-radius: var(--radius-sm);
 }
 
-/* List Animations */
-.list-enter-active,
-.list-leave-active {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+.records-pagination :deep(.el-pager li:hover),
+.records-pagination :deep(.el-pager li.is-active) {
+  color: var(--accent-gold);
 }
 
-.list-enter-from {
-  opacity: 0;
-  transform: translateX(-20px);
+.records-pagination :deep(.el-pager li.is-active) {
+  background: rgba(201, 162, 39, 0.08);
 }
 
-.list-leave-to {
-  opacity: 0;
-  transform: translateX(20px);
+.records-pagination :deep(.btn-prev),
+.records-pagination :deep(.btn-next) {
+  background: var(--bg-surface) !important;
+  color: var(--text-secondary) !important;
+  border-radius: var(--radius-sm);
 }
 
-.grid-enter-active,
-.grid-leave-active {
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+.records-pagination :deep(.btn-prev:hover),
+.records-pagination :deep(.btn-next:hover) {
+  color: var(--accent-gold) !important;
 }
 
-.grid-enter-from {
-  opacity: 0;
-  transform: scale(0.9) translateY(20px);
+/* ===== Element Plus Tab Overrides ===== */
+.detection-tabs :deep(.el-tabs__header) {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  padding: 0 var(--space-4);
 }
+.detection-tabs :deep(.el-tabs__nav-wrap::after) { display: none; }
+.detection-tabs :deep(.el-tabs__item) { color: var(--text-secondary); font-size: var(--text-sm); padding: 0 var(--space-5); }
+.detection-tabs :deep(.el-tabs__item.is-active) { color: var(--accent-gold); }
+.detection-tabs :deep(.el-tabs__active-bar) { background: var(--accent-gold); }
 
-.grid-leave-to {
-  opacity: 0;
-  transform: scale(0.9) translateY(-20px);
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .detect-grid {
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+  .result-workspace {
     grid-template-columns: 1fr;
   }
 
-  .preview-panel {
-    position: static;
-  }
-
-  .preview-container {
-    min-height: 350px;
-  }
-
-  .results-section {
+  .result-sidebar {
     max-height: none;
   }
+
+  .result-image-frame {
+    padding: var(--space-2);
+  }
+
+  .result-image {
+    max-height: 360px;
+  }
+
+  .preview-state {
+    max-width: 100%;
+  }
+
+  .preview-image {
+    max-height: 300px;
+  }
+
+  .preview-actions {
+    flex-wrap: wrap;
+  }
 }
 
 @media (max-width: 768px) {
-  .main-content {
-    padding: 6rem 0 2rem;
+  .detection-container {
+    padding: var(--space-6) var(--space-4);
   }
 
-  .page-title {
-    font-size: 2rem;
+  .upload-zone {
+    min-height: 200px;
   }
 
-  .section-container {
-    padding: 0 1rem;
+  .record-item {
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    padding: var(--space-3);
   }
 
-  .result-details {
-    grid-template-columns: 1fr;
+  .record-item__img {
+    flex: none;
+    width: 100%;
+    max-width: 200px;
+    align-self: center;
+    aspect-ratio: auto;
   }
 
-  .save-action {
+  .filter-pills {
+    justify-content: flex-start;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    padding-bottom: var(--space-1);
+  }
+
+  .filter-pills::-webkit-scrollbar { display: none; }
+
+  .pill {
+    flex-shrink: 0;
+  }
+
+  .result-detail__remark :deep(.archive-input) {
+    min-height: 44px;
+  }
+
+  .records-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .detection-container {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .upload-zone {
+    min-height: 180px;
+  }
+
+  .preview-frame {
+    padding: var(--space-2);
+  }
+
+  .preview-image {
+    max-height: 240px;
+  }
+
+  .preview-actions {
     flex-direction: column;
   }
 
-  .filter-bar {
-    flex-direction: column;
-    align-items: stretch;
+  .preview-actions :deep(.archive-button) {
+    width: 100%;
   }
 
-  .grid-container {
-    grid-template-columns: 1fr;
+  .result-image {
+    max-height: 280px;
+  }
+
+  .result-item__row {
+    gap: var(--space-2);
   }
 }
 </style>

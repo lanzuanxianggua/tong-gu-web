@@ -1,5 +1,10 @@
 from django.db import models
 from django.conf import settings
+import base64
+import io
+from datetime import datetime
+from django.core.files.base import ContentFile
+from PIL import Image
 
 class DetectionRecord(models.Model):
     """
@@ -36,12 +41,6 @@ class DetectionRecord(models.Model):
     def save(self, *args, **kwargs):
         # 如果有 annotated_image_data 但没有实际文件，需要创建文件
         if self.annotated_image_data and not self.annotated_image:
-            import base64
-            from django.core.files.base import ContentFile
-            from datetime import datetime
-            import io
-            from PIL import Image
-            
             # 解码 base64 数据
             format_str, base64_str = self.annotated_image_data.split(',', 1)
             image_format = format_str.split(';')[0].split('/')[-1]

@@ -1,665 +1,371 @@
 <template>
-  <div class="home-page-container">
-    <!-- Ambient Background Layer -->
-    <div class="ambient-bg"></div>
-    
-    <!-- Navigation System -->
-    <header 
-      class="home-nav" 
-      :class="{ scrolled: scrolled }"
-      role="banner"
-    >
-      <nav
-        :data-state="menuState ? 'active' : undefined"
-        aria-label="Main navigation"
-      >
-        <div class="home-nav-container">
-          <div class="home-nav-content">
-            <!-- Logo & Brand -->
-            <div class="home-nav-brand">
-              <div
-                @click="router.push('/')"
-                class="home-logo"
-                role="link"
-                tabindex="0"
-                aria-label="返回首页"
-              >
-                <img
-                  src="@/assets/tonggu_logo.png"
-                  alt="铜鼓智能识别与数字化保护平台"
-                  class="logo-image"
-                  loading="eager"
-                />
-                <span class="logo-text">铜鼓智能识别与数字化保护平台</span>
-              </div>
+  <div class="home-page">
+    <!-- Hero Section — Full viewport immersive -->
+    <section class="hero">
+      <div class="hero__drum" aria-hidden="true">
+        <div class="hero__drum-ring hero__drum-ring--1"></div>
+        <div class="hero__drum-ring hero__drum-ring--2"></div>
+        <div class="hero__drum-ring hero__drum-ring--3"></div>
+        <div class="hero__drum-ring hero__drum-ring--4"></div>
+        <div class="hero__drum-ring hero__drum-ring--5"></div>
+        <div class="hero__drum-core"></div>
+      </div>
+      <div class="hero__content">
+        <h1 class="hero__title text-shimmer">{{ t('home.heroTitle') }}</h1>
+        <p class="hero__subtitle">{{ t('home.heroSubtitle') }}</p>
+        <div class="hero__cta">
+          <ArchiveButton variant="primary" size="lg" @click="$router.push('/detection')">{{ t('home.ctaDetect') }}</ArchiveButton>
+          <ArchiveButton variant="secondary" size="lg" @click="$router.push('/preface')">{{ t('home.ctaLearnMore') }}</ArchiveButton>
+        </div>
+      </div>
+    </section>
 
-              <!-- Mobile Menu Toggle -->
-              <button
-                @click="toggleMenu"
-                :aria-label="menuState ? '关闭菜单' : '打开菜单'"
-                :aria-expanded="menuState"
-                class="home-nav-toggle"
-                type="button"
-              >
-                <svg
-                  :class="['home-nav-toggle-icon', { active: menuState }]"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <line x1="4" x2="20" y1="12" y2="12"/>
-                  <line x1="4" x2="20" y1="6" y2="6"/>
-                  <line x1="4" x2="20" y1="18" y2="18"/>
-                </svg>
-                <svg
-                  :class="['home-nav-toggle-close', { active: menuState }]"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M18 6 6 18"/>
-                  <path d="m6 6 12 12"/>
-                </svg>
-              </button>
+    <div class="container">
+      <BronzeDivider decorated />
 
-              <!-- Desktop Navigation Links -->
-              <div class="home-nav-links">
-                <ul role="menubar">
-                  <li v-for="(item, index) in menuItems" :key="index" role="none">
-                    <div
-                      @click="router.push(item.href)"
-                      @keydown.enter="router.push(item.href)"
-                      class="home-nav-link cursor-pointer"
-                      role="menuitem"
-                      tabindex="0"
-                    >
-                      {{ item.name }}
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>
+      <!-- Feature Cards -->
+      <section class="features">
+        <div class="features__grid">
+          <ArchiveCard
+            v-for="(feature, i) in features"
+            :key="feature.title()"
+            class="features__card animate-fade-in-up"
+            :style="{ animationDelay: `${(i + 1) * 120}ms` }"
+          >
+            <div class="feature-card__icon" v-html="feature.icon"></div>
+            <h3 class="feature-card__title">{{ feature.title() }}</h3>
+            <p class="feature-card__desc">{{ feature.desc() }}</p>
+            <router-link :to="feature.href" class="feature-card__link">
+              {{ feature.cta() }} <span class="feature-card__arrow">&rarr;</span>
+            </router-link>
+          </ArchiveCard>
+        </div>
+      </section>
 
-            <!-- Mobile Menu / Actions Area -->
-            <div
-              :class="['home-nav-menu', { active: menuState }]"
-              role="navigation"
-              aria-label="Mobile navigation"
-            >
-              <!-- Mobile Navigation Links -->
-              <div class="home-nav-mobile">
-                <ul role="menu">
-                  <li v-for="(item, index) in menuItems" :key="index" role="none">
-                    <div
-                      @click="handleMobileNavClick(item.href)"
-                      class="home-nav-link cursor-pointer"
-                      role="menuitem"
-                      tabindex="0"
-                    >
-                      {{ item.name }}
-                    </div>
-                  </li>
-                </ul>
-              </div>
+      <BronzeDivider decorated />
 
-              <!-- Authentication Actions -->
-              <div class="home-nav-actions">
-                <template v-if="!isLoggedIn">
-                  <div 
-                    class="btn-glass" 
-                    @click="router.push('/login')"
-                    role="button"
-                    tabindex="0"
-                    aria-label="登录账户"
-                  >
-                    <div class="btn-glass-shadow"></div>
-                    <div class="btn-glass-backdrop"></div>
-                    <div class="btn-glass-content">
-                      <span>登录</span>
-                    </div>
-                  </div>
-                  
-                  <div 
-                    class="btn-glass" 
-                    @click="router.push('/register')"
-                    role="button"
-                    tabindex="0"
-                    aria-label="注册新账户"
-                  >
-                    <div class="btn-glass-shadow"></div>
-                    <div class="btn-glass-backdrop"></div>
-                    <div class="btn-glass-content">
-                      <span>注册</span>
-                    </div>
-                  </div>
-                </template>
-                
-                <template v-else>
-                  <div class="home-user-info">
-                    <span 
-                      class="user-name" 
-                      @click="handleProfileClick"
-                      :title="userName"
-                      role="button"
-                      tabindex="0"
-                      aria-label="查看个人资料"
-                    >
-                      {{ userName }}
-                    </span>
-                    
-                    <div 
-                      class="btn-glass" 
-                      @click="handleLogout"
-                      role="button"
-                      tabindex="0"
-                      aria-label="退出登录"
-                    >
-                      <div class="btn-glass-shadow"></div>
-                      <div class="btn-glass-backdrop"></div>
-                      <div class="btn-glass-content">
-                        <span>退出登录</span>
-                      </div>
-                    </div>
-                  </div>
-                </template>
-              </div>
-            </div>
+      <!-- Stats Section -->
+      <section class="stats">
+        <div class="stats__grid">
+          <div
+            v-for="(stat, i) in stats"
+            :key="stat.label()"
+            class="stat-block animate-fade-in-up"
+            :style="{ animationDelay: `${(i + 1) * 150}ms` }"
+          >
+            <span class="stat-block__icon">{{ stat.icon }}</span>
+            <span class="stat-block__value">{{ stat.value() }}</span>
+            <span class="stat-block__label">{{ stat.label() }}</span>
           </div>
         </div>
-      </nav>
-    </header>
-    
-    <!-- Particle Animation Canvas -->
-    <canvas
-      ref="canvasRef"
-      class="particle-canvas"
-      @mousedown="handleMouseDown"
-      @mouseup="handleMouseUp"
-      @mousemove="handleMouseMove"
-      @mouseleave="handleMouseLeave"
-      @contextmenu.prevent
-      aria-hidden="true"
-    />
-    
-    <!-- SVG Filter Definitions -->
-    <svg class="svg-filters" aria-hidden="true">
-      <defs>
-        <filter
-          id="container-glass"
-          x="0%"
-          y="0%"
-          width="100%"
-          height="100%"
-          color-interpolation-filters="sRGB"
-        >
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.05 0.05"
-            numOctaves="1"
-            seed="1"
-            result="turbulence"
-          />
-          <feGaussianBlur in="turbulence" stdDeviation="2" result="blurredNoise" />
-          <feDisplacementMap
-            in="SourceGraphic"
-            in2="blurredNoise"
-            scale="70"
-            xChannelSelector="R"
-            yChannelSelector="B"
-            result="displaced"
-          />
-          <feGaussianBlur in="displaced" stdDeviation="4" result="finalBlur" />
-          <feComposite in="finalBlur" in2="finalBlur" operator="over" />
-        </filter>
-      </defs>
-    </svg>
+      </section>
+    </div>
   </div>
 </template>
 
-<script lang="ts">
-export const DEFAULT_WORDS = ["你好", "欢迎", "了解", "铜鼓"]
-</script>
-
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import ArchiveCard from '@/components/ArchiveCard.vue'
+import ArchiveButton from '@/components/ArchiveButton.vue'
+import BronzeDivider from '@/components/BronzeDivider.vue'
 
-import '@/styles/HomePage.css'
+const { t } = useI18n()
 
-const router = useRouter()
-
-const menuItems = [
-  { name: '前言', href: '/preface' },
-  { name: '起源与发展', href: '/origin' },
-  { name: '制作工艺', href: '/craft' },
-  { name: '铜鼓类型', href: '/types' },
-  { name: '艺术特色', href: '/art' },
-  { name: '文化功能', href: '/culture' },
-  { name: '现状', href: '/status' },
-  { name: '检测', href: '/detection' },
+const features = [
+  {
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>',
+    title: () => t('home.featureAI.title'),
+    desc: () => t('home.featureAI.desc'),
+    href: '/detection',
+    cta: () => t('home.featureAI.cta'),
+  },
+  {
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
+    title: () => t('home.featureEncyclopedia.title'),
+    desc: () => t('home.featureEncyclopedia.desc'),
+    href: '/types',
+    cta: () => t('home.featureEncyclopedia.cta'),
+  },
+  {
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>',
+    title: () => t('home.featureGallery.title'),
+    desc: () => t('home.featureGallery.desc'),
+    href: '/samples',
+    cta: () => t('home.featureGallery.cta'),
+  },
 ]
 
-const menuState = ref(false)
-const scrolled = ref(false)
-const isLoggedIn = ref(false)
-const userName = ref('')
-
-interface Vector2D {
-  x: number
-  y: number
-}
-
-interface RGBColor {
-  r: number
-  g: number
-  b: number
-}
-
-class Particle {
-  pos: Vector2D = { x: 0, y: 0 }
-  vel: Vector2D = { x: 0, y: 0 }
-  acc: Vector2D = { x: 0, y: 0 }
-  target: Vector2D = { x: 0, y: 0 }
-
-  closeEnoughTarget = 100
-  maxSpeed = 1.0
-  maxForce = 0.1
-  particleSize = 10
-  isKilled = false
-
-  startColor: RGBColor = { r: 0, g: 0, b: 0 }
-  targetColor: RGBColor = { r: 0, g: 0, b: 0 }
-  colorWeight = 0
-  colorBlendRate = 0.01
-
-  move(): void {
-    let proximityMult = 1
-    const distance = Math.sqrt(
-      Math.pow(this.pos.x - this.target.x, 2) + 
-      Math.pow(this.pos.y - this.target.y, 2)
-    )
-
-    if (distance < this.closeEnoughTarget) {
-      proximityMult = distance / this.closeEnoughTarget
-    }
-
-    const towardsTarget: Vector2D = {
-      x: this.target.x - this.pos.x,
-      y: this.target.y - this.pos.y,
-    }
-
-    const magnitude = Math.sqrt(towardsTarget.x * towardsTarget.x + towardsTarget.y * towardsTarget.y)
-    
-    if (magnitude > 0) {
-      towardsTarget.x = (towardsTarget.x / magnitude) * this.maxSpeed * proximityMult
-      towardsTarget.y = (towardsTarget.y / magnitude) * this.maxSpeed * proximityMult
-    }
-
-    const steer: Vector2D = {
-      x: towardsTarget.x - this.vel.x,
-      y: towardsTarget.y - this.vel.y,
-    }
-
-    const steerMagnitude = Math.sqrt(steer.x * steer.x + steer.y * steer.y)
-    
-    if (steerMagnitude > 0) {
-      steer.x = (steer.x / steerMagnitude) * this.maxForce
-      steer.y = (steer.y / steerMagnitude) * this.maxForce
-    }
-
-    this.acc.x += steer.x
-    this.acc.y += steer.y
-
-    this.vel.x += this.acc.x
-    this.vel.y += this.acc.y
-    this.pos.x += this.vel.x
-    this.pos.y += this.vel.y
-    
-    this.acc.x = 0
-    this.acc.y = 0
-  }
-
-  draw(ctx: CanvasRenderingContext2D, drawAsPoints: boolean): void {
-    if (this.colorWeight < 1.0) {
-      this.colorWeight = Math.min(this.colorWeight + this.colorBlendRate, 1.0)
-    }
-
-    const currentColor: RGBColor = {
-      r: Math.round(this.startColor.r + (this.targetColor.r - this.startColor.r) * this.colorWeight),
-      g: Math.round(this.startColor.g + (this.targetColor.g - this.startColor.g) * this.colorWeight),
-      b: Math.round(this.startColor.b + (this.targetColor.b - this.startColor.b) * this.colorWeight),
-    }
-
-    ctx.fillStyle = `rgb(${currentColor.r}, ${currentColor.g}, ${currentColor.b})`
-
-    if (drawAsPoints) {
-      ctx.fillRect(this.pos.x, this.pos.y, 2, 2)
-    } else {
-      ctx.beginPath()
-      ctx.arc(this.pos.x, this.pos.y, this.particleSize / 2, 0, Math.PI * 2)
-      ctx.fill()
-    }
-  }
-
-  kill(width: number, height: number): void {
-    if (!this.isKilled) {
-      const randomPos = generateRandomPos(width / 2, height / 2, (width + height) / 2)
-      
-      this.target.x = randomPos.x
-      this.target.y = randomPos.y
-
-      this.startColor = {
-        r: this.startColor.r + (this.targetColor.r - this.startColor.r) * this.colorWeight,
-        g: this.startColor.g + (this.targetColor.g - this.startColor.g) * this.colorWeight,
-        b: this.startColor.b + (this.targetColor.b - this.startColor.b) * this.colorWeight,
-      }
-      
-      this.targetColor = { r: 0, g: 0, b: 0 }
-      this.colorWeight = 0
-      this.isKilled = true
-    }
-  }
-}
-
-interface Props {
-  words?: string[]
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  words: () => DEFAULT_WORDS
-})
-
-const canvasRef = ref<HTMLCanvasElement | null>(null)
-const animationRef = ref<number | null>(null)
-const particlesRef = ref<Particle[]>([])
-const frameCountRef = ref(0)
-const wordIndexRef = ref(0)
-const mouseRef = ref({
-  x: 0,
-  y: 0,
-  isPressed: false,
-  isRightClick: false
-})
-
-const pixelSteps = 6
-const drawAsPoints = true
-
-const generateRandomPos = (x: number, y: number, mag: number): Vector2D => {
-  const randomX = Math.random() * 1000
-  const randomY = Math.random() * 500
-
-  const direction: Vector2D = {
-    x: randomX - x,
-    y: randomY - y,
-  }
-
-  const magnitude = Math.sqrt(direction.x * direction.x + direction.y * direction.y)
-  
-  if (magnitude > 0) {
-    direction.x = (direction.x / magnitude) * mag
-    direction.y = (direction.y / magnitude) * mag
-  }
-
-  return {
-    x: x + direction.x,
-    y: y + direction.y,
-  }
-}
-
-const nextWord = (word: string, canvas: HTMLCanvasElement): void => {
-  const offscreenCanvas = document.createElement("canvas")
-  offscreenCanvas.width = canvas.width
-  offscreenCanvas.height = canvas.height
-  
-  const offscreenCtx = offscreenCanvas.getContext("2d")!
-
-  offscreenCtx.fillStyle = "#ffffff"
-  offscreenCtx.font = "bold 150px 'Noto Sans SC', 'Inter', sans-serif"
-  offscreenCtx.textAlign = "center"
-  offscreenCtx.textBaseline = "middle"
-  offscreenCtx.fillText(word, canvas.width / 2, canvas.height / 2)
-
-  const imageData = offscreenCtx.getImageData(0, 0, canvas.width, canvas.height)
-  const pixels = imageData.data
-
-  const newColor: RGBColor = {
-    r: Math.floor(Math.random() * 100) + 155,
-    g: Math.floor(Math.random() * 100) + 155,
-    b: Math.floor(Math.random() * 100) + 155,
-  }
-
-  const particles = particlesRef.value
-  let particleIndex = 0
-
-  const coordsIndexes: number[] = []
-  
-  for (let i = 0; i < pixels.length; i += pixelSteps * 4) {
-    coordsIndexes.push(i)
-  }
-
-  for (let i = coordsIndexes.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[coordsIndexes[i], coordsIndexes[j]] = [coordsIndexes[j], coordsIndexes[i]]
-  }
-
-  for (const coordIndex of coordsIndexes) {
-    const pixelIndex = coordIndex
-    const alpha = pixels[pixelIndex + 3]
-
-    if (alpha > 0) {
-      const x = (pixelIndex / 4) % canvas.width
-      const y = Math.floor(pixelIndex / 4 / canvas.width)
-
-      let particle: Particle
-
-      if (particleIndex < particles.length) {
-        particle = particles[particleIndex]
-        particle.isKilled = false
-        particleIndex++
-      } else {
-        particle = new Particle()
-        const randomPos = generateRandomPos(canvas.width / 2, canvas.height / 2, (canvas.width + canvas.height) / 2)
-        
-        particle.pos.x = randomPos.x
-        particle.pos.y = randomPos.y
-
-        particle.maxSpeed = Math.random() * 6 + 4
-        particle.maxForce = particle.maxSpeed * 0.05
-        particle.particleSize = Math.random() * 6 + 6
-        particle.colorBlendRate = Math.random() * 0.0275 + 0.0025
-
-        particles.push(particle)
-      }
-
-      particle.startColor = {
-        r: particle.startColor.r + (particle.targetColor.r - particle.startColor.r) * particle.colorWeight,
-        g: particle.startColor.g + (particle.targetColor.g - particle.startColor.g) * particle.colorWeight,
-        b: particle.startColor.b + (particle.targetColor.b - particle.startColor.b) * particle.colorWeight,
-      }
-      
-      particle.targetColor = newColor
-      particle.colorWeight = 0
-
-      particle.target.x = x
-      particle.target.y = y
-    }
-  }
-
-  for (let i = particleIndex; i < particles.length; i++) {
-    particles[i].kill(canvas.width, canvas.height)
-  }
-}
-
-const animate = (): void => {
-  const canvas = canvasRef.value
-  if (!canvas) return
-
-  const ctx = canvas.getContext("2d")!
-  const particles = particlesRef.value
-
-  ctx.fillStyle = "rgba(0, 0, 0, 0.12)"
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-  for (let i = particles.length - 1; i >= 0; i--) {
-    const particle = particles[i]
-    particle.move()
-    particle.draw(ctx, drawAsPoints)
-
-    if (particle.isKilled) {
-      if (
-        particle.pos.x < 0 ||
-        particle.pos.x > canvas.width ||
-        particle.pos.y < 0 ||
-        particle.pos.y > canvas.height
-      ) {
-        particles.splice(i, 1)
-      }
-    }
-  }
-
-  if (mouseRef.value.isPressed && mouseRef.value.isRightClick) {
-    particles.forEach((particle) => {
-      const distance = Math.sqrt(
-        Math.pow(particle.pos.x - mouseRef.value.x, 2) + 
-        Math.pow(particle.pos.y - mouseRef.value.y, 2),
-      )
-      
-      if (distance < 50) {
-        particle.kill(canvas.width, canvas.height)
-      }
-    })
-  }
-
-  frameCountRef.value++
-  
-  if (frameCountRef.value % 240 === 0) {
-    wordIndexRef.value = (wordIndexRef.value + 1) % props.words.length
-    nextWord(props.words[wordIndexRef.value], canvas)
-  }
-
-  animationRef.value = requestAnimationFrame(animate)
-}
-
-const handleMouseDown = (e: MouseEvent): void => {
-  mouseRef.value.isPressed = true
-  mouseRef.value.isRightClick = e.button === 2
-  
-  const rect = (e.target as HTMLCanvasElement).getBoundingClientRect()
-  mouseRef.value.x = e.clientX - rect.left
-  mouseRef.value.y = e.clientY - rect.top
-}
-
-const handleMouseUp = (): void => {
-  mouseRef.value.isPressed = false
-  mouseRef.value.isRightClick = false
-}
-
-const handleMouseMove = (e: MouseEvent): void => {
-  const rect = (e.target as HTMLCanvasElement).getBoundingClientRect()
-  mouseRef.value.x = e.clientX - rect.left
-  mouseRef.value.y = e.clientY - rect.top
-}
-
-const handleMouseLeave = (): void => {
-  mouseRef.value.isPressed = false
-  mouseRef.value.isRightClick = false
-}
-
-const resizeCanvas = (): void => {
-  const canvas = canvasRef.value
-  if (!canvas) return
-
-  canvas.width = window.innerWidth
-  canvas.height = window.innerHeight
-  
-  nextWord(props.words[wordIndexRef.value], canvas)
-}
-
-const toggleMenu = (): void => {
-  menuState.value = !menuState.value
-}
-
-const handleMobileNavClick = (href: string): void => {
-  router.push(href)
-  menuState.value = false
-}
-
-const checkLoginStatus = (): void => {
-  const userStr = localStorage.getItem('user')
-  
-  if (userStr) {
-    try {
-      const user = JSON.parse(userStr)
-      isLoggedIn.value = true
-      userName.value = user.username || user.name || '用户'
-    } catch (e) {
-      console.error('解析用户信息失败:', e)
-      isLoggedIn.value = false
-      userName.value = ''
-    }
-  } else {
-    isLoggedIn.value = false
-    userName.value = ''
-  }
-}
-
-const handleLogout = (): void => {
-  localStorage.removeItem('user')
-  localStorage.removeItem('access_token')
-  localStorage.removeItem('refresh_token')
-  
-  isLoggedIn.value = false
-  userName.value = ''
-  
-  router.push('/')
-}
-
-const handleProfileClick = (): void => {
-  router.push('/profile')
-}
-
-const handleScroll = (): void => {
-  scrolled.value = window.scrollY > window.innerHeight * 0.05
-}
-
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll, { passive: true })
-  handleScroll()
-  
-  checkLoginStatus()
-  
-  const canvas = canvasRef.value
-  if (!canvas) return
-
-  canvas.width = window.innerWidth
-  canvas.height = window.innerHeight
-
-  window.addEventListener('resize', resizeCanvas)
-
-  nextWord(props.words[0], canvas)
-  animate()
-})
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
-  window.removeEventListener('resize', resizeCanvas)
-  
-  if (animationRef.value) {
-    cancelAnimationFrame(animationRef.value)
-  }
-})
+const stats = [
+  { icon: '🏛️', value: () => t('home.statsValues.collection'), label: () => t('home.stats.collection') },
+  { icon: '⏳', value: () => t('home.statsValues.years'), label: () => t('home.stats.years') },
+  { icon: '📖', value: () => t('home.statsValues.types'), label: () => t('home.stats.types') },
+]
 </script>
+
+<style scoped>
+.home-page {
+  padding-bottom: var(--space-16);
+}
+
+/* ===== Hero — Full Viewport ===== */
+.hero {
+  position: relative;
+  min-height: 92vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: var(--space-16) var(--space-6);
+}
+
+.hero__drum {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(600px, 80vw);
+  height: min(600px, 80vw);
+  pointer-events: none;
+}
+
+.hero__drum-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid var(--decor-pattern);
+  animation: drum-pulse 8s ease-in-out infinite;
+}
+
+.hero__drum-ring--1 { inset: 0; animation-delay: 0s; }
+.hero__drum-ring--2 { inset: 8%; border-color: rgba(201,162,39,0.08); animation-delay: 1.6s; }
+.hero__drum-ring--3 { inset: 16%; border-color: rgba(201,162,39,0.1); animation-delay: 3.2s; }
+.hero__drum-ring--4 { inset: 26%; border-color: rgba(201,162,39,0.06); animation-delay: 4.8s; }
+.hero__drum-ring--5 { inset: 38%; border-color: rgba(184,115,51,0.08); animation-delay: 6.4s; }
+
+.hero__drum-core {
+  position: absolute;
+  inset: 46%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,162,39,0.06) 0%, transparent 70%);
+  border: 1px solid rgba(201,162,39,0.08);
+}
+
+@keyframes drum-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%      { opacity: 1; transform: scale(1.02); }
+}
+
+.hero__content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  animation: fadeInUp 0.8s var(--ease-out) both;
+}
+
+.hero__title {
+  font-family: var(--font-display);
+  font-size: var(--text-6xl);
+  font-weight: 900;
+  line-height: var(--leading-tight);
+  margin-bottom: var(--space-6);
+  letter-spacing: 0.04em;
+}
+
+.hero__subtitle {
+  font-size: var(--text-lg);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-10);
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: var(--leading-relaxed);
+}
+
+.hero__cta {
+  display: flex;
+  gap: var(--space-4);
+  justify-content: center;
+}
+
+/* ===== Features ===== */
+.features {
+  padding: var(--space-8) 0;
+}
+
+.features__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+}
+
+.feature-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.feature-card__icon {
+  color: var(--accent-gold);
+  width: 32px;
+  height: 32px;
+}
+
+.feature-card__title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.feature-card__desc {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+  flex: 1;
+}
+
+.feature-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--accent-gold);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--duration-fast), gap var(--duration-fast);
+}
+
+.feature-card__link:hover {
+  color: var(--accent-gold-light);
+  gap: var(--space-2);
+}
+
+/* ===== Stats ===== */
+.stats {
+  padding: var(--space-10) 0 var(--space-4);
+}
+
+.stats__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+}
+
+.stat-block {
+  text-align: center;
+  padding: var(--space-8) var(--space-6);
+  position: relative;
+}
+
+.stat-block::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+  opacity: 0.3;
+}
+
+.stat-block__icon {
+  display: block;
+  font-size: 28px;
+  opacity: 0.6;
+  margin-bottom: var(--space-3);
+}
+
+.stat-block__value {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--text-5xl);
+  font-weight: 500;
+  color: var(--accent-gold);
+  line-height: 1;
+  margin-bottom: var(--space-2);
+}
+
+.stat-block__label {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-weight: var(--weight-medium);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .hero {
+    min-height: 75vh;
+    padding: var(--space-16) var(--space-4);
+  }
+
+  .hero__drum {
+    width: min(400px, 90vw);
+    height: min(400px, 90vw);
+  }
+
+  .hero__title {
+    font-size: var(--text-4xl);
+    letter-spacing: 0.02em;
+  }
+
+  .hero__subtitle {
+    font-size: var(--text-base);
+    margin-bottom: var(--space-8);
+  }
+
+  .hero__cta {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .features__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .stats__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+
+  .stat-block {
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .stat-block__value {
+    font-size: var(--text-4xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    min-height: 65vh;
+    padding: var(--space-10) var(--space-3);
+  }
+
+  .hero__drum {
+    width: min(300px, 95vw);
+    height: min(300px, 95vw);
+  }
+
+  .hero__title {
+    font-size: var(--text-2xl);
+  }
+
+  .hero__subtitle {
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-6);
+  }
+
+  .hero__cta :deep(.btn-archive) {
+    width: 100%;
+    max-width: none;
+  }
+
+  .stat-block__value {
+    font-size: var(--text-3xl);
+  }
+}
+</style>

@@ -11,13 +11,21 @@ from dotenv import load_dotenv
 # 加载 .env 文件
 load_dotenv()
 
-# 使用环境变量中的密钥，如果没有则使用默认密钥
-SECRET_KEY = os.environ.get('SECRET_KEY', 'm70vzvgohp)*nwcl$#$rsbrpfh#%&__!-w6@7(-d_jvaf=8g*y')
+from django.core.exceptions import ImproperlyConfigured
 
-# 控制 Django 的调试模式
-DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
-# 允许所有主机访问
+def _get_env(name, default=None, required=False):
+    value = os.environ.get(name, default)
+    if required and not value:
+        raise ImproperlyConfigured(f"环境变量 {name} 未设置，请在 .env 文件中配置")
+    return value
+
+# 使用环境变量中的密钥（必须在 .env 中配置）
+SECRET_KEY = _get_env('SECRET_KEY', required=True)
+
+# 控制 Django 的调试模式（默认关闭，生产环境安全）
+DEBUG = _get_env('DEBUG', 'False').lower() == 'true'
+
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',') if os.environ.get('ALLOWED_HOSTS') else []
 
 # 生产环境安全设置
@@ -44,9 +52,9 @@ INSTALLED_APPS = [
     # 自定义应用
     "users",
     "detection",
-       # Django REST Framework
     "rest_framework",  # 用于构建 RESTful API
     "rest_framework.authtoken", # 用于 API 身份验证
+    "rest_framework_simplejwt.token_blacklist",  # JWT token 黑名单（登出功能）
 ]
 
 MIDDLEWARE = [
@@ -90,7 +98,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": os.environ.get('DB_NAME', 'tong-gu'),
         "USER": os.environ.get('DB_USER', 'root'),
-        "PASSWORD": os.environ.get('DB_PASSWORD', '20041017Sheng@'),
+        "PASSWORD": _get_env('DB_PASSWORD', required=True),
         "HOST": os.environ.get('DB_HOST', '127.0.0.1'),
         "PORT": os.environ.get('DB_PORT', '3306'),
         "OPTIONS": {
@@ -159,7 +167,16 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
-    ]
+    ],
+    # 速率限制
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/minute',
+        'user': '30/minute',
+    }
 }
 
 # Simple JWT 配置
@@ -219,6 +236,9 @@ CORS_ALLOW_HEADERS = [
 CORS_ALLOW_CREDENTIALS = True
 
 # 日志配置
+LOG_DIR = BASE_DIR / 'logs'
+LOG_DIR.mkdir(exist_ok=True)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -226,7 +246,7 @@ LOGGING = {
         'file': {
             'level': 'WARNING',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
+            'filename': str(LOG_DIR / 'django.log'),
             'maxBytes': 1024*1024*100,  # 100MB
             'backupCount': 5,
         },

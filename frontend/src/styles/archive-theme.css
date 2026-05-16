@@ -1,0 +1,1104 @@
+/* ============================================================
+   青铜档案馆 — Archive Theme Design System
+   Bronze Drum Pattern Detection System
+   ============================================================ */
+
+/* --- Google Fonts Import (使用国内镜像) --- */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@font-face {
+  font-family: 'Noto Serif SC';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Noto Serif SC'), local('NotoSerifSC-Regular');
+}
+@font-face {
+  font-family: 'Noto Sans SC';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Noto Sans SC'), local('NotoSansSC-Regular');
+}
+
+/* ============================================================
+   1. CSS Custom Properties (Design Tokens)
+   ============================================================ */
+:root {
+  /* === 底色层 (Background Layer) === */
+  --bg-primary:    #12100d;
+  --bg-surface:    #221c17;
+  --bg-elevated:   #2e2620;
+  --bg-hover:      #3a3129;
+
+  /* === 文字层 (Text Layer) === */
+  --text-primary:  #e8dcc8;
+  --text-secondary:#a89a82;
+  --text-muted:    #6b5d52;
+  --text-on-accent:#1a1612;
+
+  /* === 强调色 (Accent Colors) === */
+  --accent-gold:       #c9a227;
+  --accent-gold-light: #dfc56a;
+  --accent-copper:     #b87333;
+  --accent-verdigris:  #4a7c59;
+  --accent-red:        #a04040;
+
+  /* === 边框与分割 (Borders & Dividers) === */
+  --border-subtle: #3d332a;
+  --border-gold:   rgba(201,162,39,0.3);
+  --border-focus:  rgba(201,162,39,0.6);
+
+  /* === 装饰 (Decorative) === */
+  --decor-line:    rgba(201,162,39,0.15);
+  --decor-pattern: rgba(201,162,39,0.06);
+
+  /* === 字体 (Typography) === */
+  --font-display: 'Noto Serif SC', 'SimSun', serif;
+  --font-body:    'Noto Sans SC', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Consolas', monospace;
+
+  /* 字号 scale */
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+  --text-4xl:  2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+
+  /* 字重 */
+  --weight-normal:   400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:    700;
+  --weight-black:    900;
+
+  /* 行高 */
+  --leading-tight:   1.25;
+  --leading-snug:    1.375;
+  --leading-normal:  1.6;
+  --leading-relaxed: 1.75;
+
+  /* === 间距系统 (Spacing - 8px grid) === */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* === 圆角 (Border Radius) === */
+  --radius-none: 0;
+  --radius-sm:   2px;
+  --radius-md:   4px;
+  --radius-lg:   8px;
+
+  /* === 阴影 (Shadows) === */
+  --shadow-inset:    inset 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-card:     0 1px 3px rgba(0,0,0,0.15);
+  --shadow-elevated: 0 4px 12px rgba(0,0,0,0.25);
+  --shadow-glow:     0 0 20px rgba(201,162,39,0.08);
+
+  /* === 动效 (Animation) === */
+  --ease-out:      cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --duration-fast:   150ms;
+  --duration-normal: 300ms;
+  --duration-slow:   500ms;
+
+  /* === 铜鼓装饰 (Drum Decorative) === */
+  --shimmer-gradient: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(201,162,39,0.15) 50%,
+    transparent 70%
+  );
+}
+
+/* ============================================================
+   2. Element Plus Variable Overrides
+   ============================================================ */
+:root {
+  --el-color-primary:           var(--accent-gold);
+  --el-color-primary-light-3: var(--accent-gold-light);
+  --el-color-primary-light-5: rgba(201,162,39,0.5);
+  --el-color-primary-light-7: rgba(201,162,39,0.3);
+  --el-color-primary-light-9: rgba(201,162,39,0.15);
+  --el-color-primary-dark-2:  #a8871f;
+  --el-color-success:           var(--accent-verdigris);
+  --el-color-warning:           var(--accent-copper);
+  --el-color-danger:            var(--accent-red);
+  --el-color-info:              var(--text-secondary);
+
+  --el-bg-color:                var(--bg-primary);
+  --el-bg-color-page:           var(--bg-primary);
+  --el-bg-color-overlay:        rgba(26,22,18,0.85);
+  --el-bg-color-mask:           rgba(0,0,0,0.6);
+
+  --el-text-color-primary:      var(--text-primary);
+  --el-text-color-regular:      var(--text-secondary);
+  --el-text-color-secondary:    var(--text-muted);
+  --el-text-color-placeholder:  var(--text-muted);
+
+  --el-border-color:            var(--border-subtle);
+  --el-border-color-light:      var(--border-subtle);
+  --el-border-color-lighter:    rgba(61,51,42,0.5);
+  --el-border-color-extra-light:rgba(61,51,42,0.3);
+
+  --el-fill-color:              var(--bg-elevated);
+  --el-fill-color-light:        var(--bg-hover);
+  --el-fill-color-lighter:      rgba(53,43,36,0.5);
+  --el-fill-color-extra-light:  rgba(53,43,36,0.3);
+
+  --el-font-family:             var(--font-body);
+  --el-font-size-base:          var(--text-base);
+
+  --el-disabled-bg-color:       var(--bg-hover);
+  --el-disabled-text-color:     var(--text-muted);
+  --el-disabled-border-color:   var(--border-subtle);
+
+  --el-box-shadow:               var(--shadow-card);
+  --el-box-shadow-light:        var(--shadow-inset);
+  --el-box-shadow-lighter:       none;
+  --el-box-shadow-dark:         var(--shadow-elevated);
+
+  /* Input / Form overrides */
+  --el-input-bg-color:           transparent;
+  --el-input-border-color:      var(--border-subtle);
+  --el-input-text-color:         var(--text-primary);
+  --el-input-placeholder-color: var(--text-muted);
+  --el-input-hover-border-color:var(--text-muted);
+  --el-input-focus-border-color: var(--accent-gold);
+
+  /* Table overrides */
+  --el-table-header-bg-color:    var(--bg-elevated);
+  --el-table-row-hover-bg-color: var(--bg-hover);
+  --el-table-current-row-bg-color:rgba(201,162,39,0.08);
+  --el-table-border-color:       var(--border-subtle);
+
+  /* Dialog / Modal overrides */
+  --el-dialog-bg-color:         var(--bg-surface);
+  --el-dialog-title-font-size:  var(--text-xl);
+  --el-dialog-title-font-weight:var(--weight-bold);
+  --el-dialog-padding-primary:   var(--space-6);
+
+  /* Card overrides */
+  --el-card-bg-color:            var(--bg-surface);
+  --el-card-border-color:        var(--border-subtle);
+
+  /* Menu overrides */
+  --el-menu-bg-color:            transparent;
+  --el-menu-hover-bg-color:      var(--bg-hover);
+  --el-menu-active-color:        var(--accent-gold);
+  --el-menu-text-color:          var(--text-secondary);
+  --el-menu-active-text-color:   var(--accent-gold);
+  --el-menu-hover-text-color:    var(--text-primary);
+
+  /* Tag overrides */
+  --el-tag-bg-color:             rgba(201,162,39,0.12);
+  --el-tag-border-color:         rgba(201,162,39,0.3);
+  --el-tag-text-color:           var(--accent-gold);
+
+  /* Pagination overrides */
+  --el-pagination-button-bg-color:     var(--bg-surface);
+  --el-pagination-hover-color:          var(--accent-gold);
+
+  /* Tabs overrides */
+  --el-tabs-header-height:       48px;
+  --el-tabs-active-color:       var(--accent-gold);
+  --el-tabs-item-hover-color:   var(--text-primary);
+  --el-tabs-item-is-active-color:var(--accent-gold);
+}
+
+/* ============================================================
+   3. CSS Reset (Minimal)
+   ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  background-image: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(201,162,39,0.04) 0%, transparent 70%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background texture — subtle noise via pseudo-element */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+}
+
+/* Concentric drum pattern — low-opacity decorative circles */
+body::after {
+  content: '';
+  position: fixed;
+  top: 10%;
+  left: 50%;
+  width: 800px;
+  height: 800px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.025;
+  background-image:
+    radial-gradient(circle, transparent 58%, var(--accent-gold) 59%, transparent 60%),
+    radial-gradient(circle, transparent 48%, var(--accent-gold) 49%, transparent 50%),
+    radial-gradient(circle, transparent 38%, var(--accent-gold) 39%, transparent 40%),
+    radial-gradient(circle, transparent 28%, var(--accent-gold) 29%, transparent 30%),
+    radial-gradient(circle, transparent 18%, var(--accent-gold) 19%, transparent 20%),
+    radial-gradient(circle, transparent 8%, var(--accent-copper) 9%, transparent 10%);
+  animation: drum-rotate 120s linear infinite;
+}
+
+@media (max-width: 768px) {
+  body::after {
+    width: 500px;
+    height: 500px;
+    opacity: 0.015;
+  }
+}
+
+@media (max-width: 480px) {
+  body::after {
+    width: 320px;
+    height: 320px;
+  }
+}
+
+@keyframes drum-rotate {
+  from { transform: translateX(-50%) rotate(0deg); }
+  to   { transform: translateX(-50%) rotate(360deg); }
+}
+
+#app {
+  position: relative;
+  z-index: 1;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--text-primary);
+  overflow-wrap: break-word;
+}
+
+h1 { font-size: var(--text-5xl); }
+h2 { font-size: var(--text-4xl); }
+h3 { font-size: var(--text-3xl); }
+h4 { font-size: var(--text-2xl); }
+h5 { font-size: var(--text-xl); }
+h6 { font-size: var(--text-lg); }
+
+p {
+  margin-bottom: var(--space-4);
+  line-height: var(--leading-relaxed);
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+/* Scrollbar styling for archive feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Selection styling */
+::selection {
+  background: rgba(201,162,39,0.25);
+  color: var(--text-primary);
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   4. Typography Utility Classes
+   ============================================================ */
+.text-gold       { color: var(--accent-gold); }
+.text-gold-light { color: var(--accent-gold-light); }
+.text-copper     { color: var(--accent-copper); }
+.text-verdigris  { color: var(--accent-verdigris); }
+.text-red        { color: var(--accent-red); }
+.text-muted      { color: var(--text-muted); }
+.text-secondary  { color: var(--text-secondary); }
+
+.font-display    { font-family: var(--font-display); }
+.font-body       { font-family: var(--font-body); }
+.font-mono       { font-family: var(--font-mono); }
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold), var(--accent-copper));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.text-center { text-align: center; }
+.text-left   { text-align: left; }
+.text-right  { text-align: right; }
+
+/* ============================================================
+   5. Layout Utility Classes
+   ============================================================ */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-6);
+  padding-right: var(--space-6);
+}
+
+.container-narrow {
+  width: 100%;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-6);
+  padding-right: var(--space-6);
+}
+
+.container-wide {
+  width: 100%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-6);
+  padding-right: var(--space-6);
+}
+
+.grid-2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-6);
+}
+
+.grid-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+}
+
+.grid-4col {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-6);
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+.gap-6 { gap: var(--space-6); }
+.gap-8 { gap: var(--space-8); }
+
+/* Section spacing */
+.section {
+  padding-top: var(--space-16);
+  padding-bottom: var(--space-16);
+}
+
+.section-sm {
+  padding-top: var(--space-10);
+  padding-bottom: var(--space-10);
+}
+
+/* ============================================================
+   6. Component Base Styles
+   ============================================================ */
+
+/* --- Archive Card Base --- */
+.archive-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-inset);
+  padding: var(--space-6);
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--duration-normal) var(--ease-out),
+              box-shadow var(--duration-normal) var(--ease-out),
+              transform var(--duration-normal) var(--ease-out);
+}
+
+.archive-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: var(--shimmer-gradient);
+  transition: left 0.6s ease;
+}
+
+.archive-card:hover {
+  border-color: rgba(201,162,39,0.4);
+  box-shadow: var(--shadow-glow), var(--shadow-card), var(--shadow-inset);
+  transform: translateY(-2px);
+}
+
+.archive-card:hover::before {
+  left: 150%;
+}
+
+/* --- Archive Button Base --- */
+.btn-archive {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.05em;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  position: relative;
+  user-select: none;
+}
+
+.btn-archive:active {
+  transform: translateY(1px);
+}
+
+.btn-archive--primary {
+  background: var(--accent-gold);
+  color: var(--text-on-accent);
+  border-bottom: 2px solid #a8871f;
+}
+
+.btn-archive--primary:hover {
+  background: var(--accent-gold-light);
+}
+
+.btn-archive--secondary {
+  background: transparent;
+  color: var(--accent-gold);
+  border: 1px solid var(--accent-gold);
+  border-bottom: 2px solid var(--accent-gold);
+}
+
+.btn-archive--secondary:hover {
+  background: rgba(201,162,39,0.08);
+}
+
+.btn-archive--ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border-bottom: 1px solid transparent;
+}
+
+.btn-archive--ghost:hover {
+  color: var(--text-primary);
+  border-bottom-color: var(--text-muted);
+}
+
+.btn-archive--danger {
+  background: transparent;
+  color: var(--accent-red);
+  border: 1px solid var(--accent-red);
+  border-bottom: 2px solid var(--accent-red);
+}
+
+.btn-archive--danger:hover {
+  background: rgba(160,64,64,0.1);
+}
+
+.btn-archive--full {
+  width: 100%;
+}
+
+.btn-archive--sm {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-xs);
+}
+
+.btn-archive--lg {
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--text-base);
+}
+
+/* --- Archive Input Base --- */
+.archive-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  padding: var(--space-3) 0;
+  border-radius: 0;
+  outline: none;
+  transition: border-color var(--duration-fast) var(--ease-out),
+              border-width var(--duration-fast) var(--ease-out);
+}
+
+.archive-input:focus {
+  border-bottom-color: var(--accent-gold);
+  border-bottom-width: 2px;
+}
+
+.archive-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* --- Bronze Divider --- */
+.bronze-divider {
+  border-top: 1px solid var(--decor-line);
+  border-bottom: 1px solid var(--decor-line);
+  height: 0;
+  margin: var(--space-8) 0;
+}
+
+.bronze-divider--compact {
+  margin: var(--space-4) 0;
+}
+
+.bronze-divider--spacious {
+  margin: var(--space-12) 0;
+}
+
+/* --- Section Header --- */
+.section-header {
+  text-align: center;
+  margin-bottom: var(--space-10);
+}
+
+.section-header__title {
+  font-family: var(--font-display);
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-black);
+  color: var(--text-primary);
+  margin-bottom: var(--space-4);
+  position: relative;
+  display: inline-block;
+}
+
+.section-header__title::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+  margin: var(--space-3) auto 0;
+}
+
+.section-header__subtitle {
+  font-size: var(--text-lg);
+  color: var(--text-secondary);
+  font-weight: var(--weight-normal);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* --- Stat Card --- */
+.stat-card {
+  text-align: center;
+  padding: var(--space-8) var(--space-6);
+}
+
+.stat-card__number {
+  font-family: var(--font-mono);
+  font-size: var(--text-5xl);
+  font-weight: 500;
+  color: var(--accent-gold);
+  line-height: 1;
+  margin-bottom: var(--space-2);
+}
+
+.stat-card__label {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-weight: var(--weight-medium);
+}
+
+/* ============================================================
+   7. Animations (@keyframes)
+   ============================================================ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-gold {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.6; }
+}
+
+@keyframes bronze-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes concentric-reveal {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animation utility classes */
+.animate-fade-in-up {
+  animation: fadeInUp var(--duration-slow) var(--ease-out) both;
+}
+
+.animate-fade-in {
+  animation: fadeIn var(--duration-normal) var(--ease-out) both;
+}
+
+.animate-fade-in-down {
+  animation: fadeInDown var(--duration-normal) var(--ease-out) both;
+}
+
+/* Staggered animation delays */
+.delay-1 { animation-delay: 100ms; }
+.delay-2 { animation-delay: 200ms; }
+.delay-3 { animation-delay: 300ms; }
+.delay-4 { animation-delay: 400ms; }
+.delay-5 { animation-delay: 500ms; }
+.delay-6 { animation-delay: 600ms; }
+
+/* Bronze shimmer text effect */
+.text-shimmer {
+  background: linear-gradient(
+    120deg,
+    var(--accent-gold) 0%,
+    var(--accent-gold-light) 25%,
+    var(--accent-copper) 50%,
+    var(--accent-gold-light) 75%,
+    var(--accent-gold) 100%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: bronze-shimmer 4s linear infinite;
+}
+
+/* Drum decorative border */
+.drum-border {
+  position: relative;
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-sm);
+}
+.drum-border::before,
+.drum-border::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--accent-gold);
+  opacity: 0.4;
+}
+.drum-border::before {
+  top: -1px;
+  left: -1px;
+  border-right: none;
+  border-bottom: none;
+}
+.drum-border::after {
+  bottom: -1px;
+  right: -1px;
+  border-left: none;
+  border-top: none;
+}
+
+/* Gold glow utility */
+.glow-gold {
+  box-shadow: var(--shadow-glow);
+}
+
+/* ============================================================
+   8. Page Transition
+   ============================================================ */
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition: opacity var(--duration-normal) var(--ease-out),
+              transform var(--duration-normal) var(--ease-out);
+}
+.page-fade-enter-from {
+  opacity: 0;
+  transform: translateY(12px);
+}
+.page-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* ============================================================
+   9. Content-Specific Styles
+   ============================================================ */
+
+/* Paragraph indent for Chinese content (卷轴 style) */
+.content-prose p {
+  text-indent: 2em;
+  margin-bottom: var(--space-4);
+  line-height: var(--leading-relaxed);
+}
+
+.content-prose p:first-child {
+  text-indent: 0;
+}
+
+/* Blockquote — archive reference style */
+.content-blockquote {
+  border-left: 3px solid var(--accent-gold);
+  background: rgba(201,162,39,0.05);
+  padding: var(--space-4) var(--space-6);
+  margin: var(--space-6) 0;
+  font-style: italic;
+  color: var(--text-secondary);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+/* Figure with caption */
+.content-figure {
+  margin: var(--space-8) 0;
+  text-align: center;
+}
+
+.content-figure img {
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-sm);
+  margin: 0 auto;
+}
+
+.content-figure figcaption {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Definition list for info display */
+.info-dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-3) var(--space-6);
+}
+
+.info-dl dt {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.info-dl dd {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+}
+
+/* Timeline component base */
+.timeline {
+  position: relative;
+  padding-left: var(--space-8);
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--decor-line);
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: var(--space-8);
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--space-8) + 7px);
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  border: 2px solid var(--accent-gold);
+}
+
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: var(--space-16) var(--space-6);
+  color: var(--text-muted);
+}
+
+.empty-state__icon {
+  font-size: 48px;
+  margin-bottom: var(--space-4);
+  opacity: 0.4;
+}
+
+.empty-state__text {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-4);
+}
+
+/* ============================================================
+   10. Element Plus Message Override (Archive Style)
+   ============================================================ */
+.el-message {
+  --el-message-bg-color: var(--bg-surface) !important;
+  border-color: var(--border-subtle) !important;
+  box-shadow: var(--shadow-elevated) !important;
+  border-radius: var(--radius-sm) !important;
+  padding: var(--space-3) var(--space-5) !important;
+}
+
+.el-message .el-message__content {
+  color: var(--text-primary) !important;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+}
+
+.el-message--error {
+  border-left: 3px solid var(--accent-red) !important;
+}
+
+.el-message--success {
+  border-left: 3px solid var(--accent-verdigris) !important;
+}
+
+.el-message--warning {
+  border-left: 3px solid var(--accent-copper) !important;
+}
+
+.el-message--info {
+  border-left: 3px solid var(--text-muted) !important;
+}
+
+.el-message .el-message__icon {
+  color: var(--text-secondary) !important;
+}
+
+.el-message--error .el-message__icon { color: var(--accent-red) !important; }
+.el-message--success .el-message__icon { color: var(--accent-verdigris) !important; }
+.el-message--warning .el-message__icon { color: var(--accent-copper) !important; }
+
+/* ============================================================
+   11. Element Plus MessageBox Override (Archive Style)
+   ============================================================ */
+.el-message-box {
+  --el-messagebox-title-color: var(--text-primary);
+  --el-messagebox-content-color: var(--text-secondary);
+  background-color: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-elevated) !important;
+}
+
+.el-message-box__header {
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.el-message-box__title {
+  color: var(--text-primary) !important;
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+}
+
+.el-message-box__content {
+  color: var(--text-secondary) !important;
+}
+
+.el-message-box__btns .el-button--default {
+  background-color: var(--bg-elevated) !important;
+  border-color: var(--border-subtle) !important;
+  color: var(--text-secondary) !important;
+}
+
+.el-message-box__btns .el-button--default:hover {
+  background-color: var(--bg-hover) !important;
+  border-color: var(--text-muted) !important;
+  color: var(--text-primary) !important;
+}
+
+.el-message-box__btns .el-button--primary {
+  background-color: var(--accent-gold) !important;
+  border-color: var(--accent-gold) !important;
+  color: var(--text-on-accent) !important;
+}
+
+.el-message-box__btns .el-button--primary:hover {
+  background-color: var(--accent-gold-light) !important;
+}
+
+/* ============================================================
+   12. Browser Autofill Override
+   ============================================================ */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-surface) inset !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  caret-color: var(--text-primary);
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+input:-moz-autofill-preview,
+input:-moz-autofill {
+  filter: none;
+}
