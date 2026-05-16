@@ -1,45 +1,86 @@
 version: '3.8'
 
 services:
+  # MySQL 数据库
+  db:
+    image: mysql:8.0
+    container_name: tonggu-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-tonggu}
+      MYSQL_USER: ${DB_USER:-tonggu}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-changeme}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpwd}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./tong-gu.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - tonggu-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+
+  # Django 后端 + YOLO
   backend:
     build:
       context: .
       dockerfile: Dockerfile
-    image: recardomlu/tonggu-backend:latest
     container_name: tonggu-backend
     restart: always
-    network_mode: "host"
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
-      SECRET_KEY: k8fuShpFnvtBZUdWESEQ
-      DB_NAME: tonggu
-      DB_USER: tonggu
-      DB_PASSWORD: f3cbB2RzLCfX5wR4
-      DB_HOST: 127.0.0.1
+      SECRET_KEY: ${SECRET_KEY:-changeme-secret-key}
+      DB_NAME: ${DB_NAME:-tonggu}
+      DB_USER: ${DB_USER:-tonggu}
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      DB_HOST: db
       DB_PORT: 3306
-      DEBUG: 'False'
-      ALLOWED_HOSTS: tong-gu.cn,www.tong-gu.cn
+      DEBUG: ${DEBUG:-False}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
     volumes:
       - media_data:/app/media
       - logs_data:/app/logs
+    networks:
+      - tonggu-network
     security_opt:
       - no-new-privileges:true
     command: >
       sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&
-             gunicorn --bind 0.0.0.0:8000 --workers 3 backend.wsgi:application"
+             gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 120 backend.wsgi:application"
 
-  watchtower:
-    image: containrrr/watchtower
-    container_name: watchtower
+  # Nginx 反向代理 + 前端静态文件
+  nginx:
+    image: nginx:alpine
+    container_name: tonggu-nginx
     restart: always
+    depends_on:
+      - backend
+    ports:
+      - "${NGINX_PORT:-80}:80"
+      - "${NGINX_SSL_PORT:-443}:443"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /root/.docker/config.json:/config.json:ro
-    environment:
-      WATCHTOWER_CLEANUP: "true"
-      WATCHTOWER_POLL_INTERVAL: 3600
-    command: --interval 3600 --cleanup
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend/dist:/usr/share/nginx/html:ro
+      - media_data:/usr/share/nginx/html/media:ro
+      # SSL 证书（如需 HTTPS，取消注释）
+      # - ./ssl/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
+      # - ./ssl/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
+    networks:
+      - tonggu-network
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  tonggu-network:
+    driver: bridge
 
 volumes:
+  mysql_data:
   media_data:
   logs_data:

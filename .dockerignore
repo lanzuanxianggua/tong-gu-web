@@ -13,8 +13,6 @@ venv/
 ENV/
 .venv
 *.egg-info/
-dist/
-build/
 
 # IDE
 .idea/
@@ -27,31 +25,43 @@ build/
 .pytest_cache/
 .coverage
 htmlcov/
-*.cover
 
 # 日志
 logs/
 *.log
 
-# 媒体文件（可选，如果不需要在容器中处理图片）
-# media/
-
-# Docker
-Dockerfile
-docker-compose.yml
-.dockerignore
+# 媒体文件（运行时挂载 volume）
+media/
 
 # 数据库
 *.db
 *.sqlite3
 
-# 环境文件（使用 docker-compose.yml 中的环境变量）
+# 环境文件（使用 docker-compose 中的环境变量）
 .env
+.env.local
 .env.production
 
-# 前端构建产物（如果使用独立的 Nginx 服务）
-frontend/dist/
+# 前端源码和构建产物（由 Nginx 单独服务）
 frontend/node_modules/
+frontend/src/
+frontend/public/
+frontend/.env
+frontend/.env.production
+frontend/package-lock.json
+frontend/vite.config.js
+frontend/tsconfig.json
+frontend/vue-shims.d.ts
+frontend/global.d.ts
+frontend/index.html
 
-# YOLO 训练数据
-exp21/
+# YOLO 训练产物（只保留 best.pt）
+exp21/weights/last.pt
+exp21/*/!
+exp21/*/
+
+# 临时文件
+*.tmp
+*.bak
+*.pem
+*.key

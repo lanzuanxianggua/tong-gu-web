@@ -207,6 +207,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3003",
     "http://127.0.0.1:3004",
     "http://127.0.0.1:8080",
+    "https://tong-gu.cn",
+    "https://www.tong-gu.cn",
+    "http://tong-gu.cn",
+    "http://www.tong-gu.cn",
 ]
 
 # 允许的HTTP方法
