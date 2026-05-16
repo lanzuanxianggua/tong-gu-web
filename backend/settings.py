@@ -76,7 +76,7 @@ ROOT_URLCONF = "backend.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / 'frontend' / 'dist'],
+        "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -138,9 +138,7 @@ USE_TZ = True
 
 # 静态文件配置
 STATIC_URL = "static/"
-STATICFILES_DIRS = [
-    BASE_DIR / 'frontend' / 'dist'
-]
+STATICFILES_DIRS = []
 STATIC_ROOT = BASE_DIR / 'static'
 
 # 媒体文件配置
